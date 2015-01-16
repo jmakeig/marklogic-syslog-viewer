@@ -48,9 +48,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 //   }
 // );
 
-
-var EventEmitter = require('events').EventEmitter;
-var listener = new EventEmitter();
+var TimedBuffer = require('./timed-buffer.js');
+var buffer = new TimedBuffer(1000, 10);
 
 app.get('/', function (req, res) {
   res.send('Hello World!')
@@ -61,19 +60,24 @@ app.get('/', function (req, res) {
  */
 app.route('/stream')
   .get(function(req, res) {
+    console.log('Last-Event-ID: %s', req.get('Last-Event-ID'));
     res.writeHead(200, {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
         'Connection': 'keep-alive'
     });
-    listener.on('message', function(msg) {
-      writeEvent({
-        event: 'log',
-        data: JSON.stringify(msg)
-      }, res);
-      //res.write('event: log\n');
-      //res.write('id: ' + (++count) + '\n');
-      //res.write('data: '+ JSON.stringify(msg) +'\n\n'); // Note the extra newline
+    buffer.on('flush', function(msgs) {
+      msgs.forEach(function(msg) {
+        writeEvent({
+          event: 'log',
+          data: msg, 
+          // If the connection to the server is dropped, a special HTTP header (Last-Event-ID) 
+          // is set with the new request. This lets the browser determine which event is 
+          // appropriate to fire. The message event contains a e.lastEventId property.
+          // <http://www.html5rocks.com/en/tutorials/eventsource/basics/>
+          id: msg.time // Use the message's timestamp as the last identifier
+        }, res);
+      });
     });
   });
 
@@ -82,18 +86,22 @@ app.route('/stream')
  * server-sent events expects.
  */
 function writeEvent(event, stream) {
+  // options = options || {};
   for(var p in event) {
     stream.write(p + ': ' + event[p] + '\n');
   }
+  // if(true === options.includeId) {
+  //   stream.write('id: ' + (new Date()).toISOString());
+  // }
   stream.write('\n');
 }
 
 /**
  * Listen for individual messages sent from a MarkLogic trigger.
  */
-app.post('/logs', bodyParser.json(), function(req, res) {
-  console.log('POST to /logs');
-  listener.emit('message', req.body);
+app.post('/logs', bodyParser.text({type: 'application/json'}), function(req, res) {
+  console.log('POST to /logs: %s', req.body);
+  buffer.push(req.body);
   res.sendStatus(204);
   res.end();
 });
