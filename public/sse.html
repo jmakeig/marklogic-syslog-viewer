@@ -4,12 +4,16 @@
   <meta charset="utf-8" />
   <title>Log Viewer</title>
   <script type="text/javascript">
+(function() {
   document.addEventListener('DOMContentLoaded', function(e) {
+
 
     var source = new EventSource('/stream');
 
     source.addEventListener('log', function(e) {
-      console.dir(JSON.parse(e.data));
+      var msg = JSON.parse(e.data);
+      console.dir(msg);
+      appendLog(msg);
     }, false);
 
     source.addEventListener('open', function(e) {
@@ -17,15 +21,63 @@
     }, false);
 
     source.onerror = function(e) {
-      console.log(e);
+      console.dir(e);
       //if (e.readyState == EventSource.CLOSED) {
         this.close();
       //}
     }
   }, false);
+  
+  // FIXME: Need a real view/templating library, like React
+  // TODO: Need to figure out how to window so that old logs are purged
+  function appendLog(msg) {
+    var body = document.querySelector('table#Logs > tbody');
+    var row = document.createElement('tr');
+    var time = document.createElement('td'),
+        host = document.createElement('td'),
+        severity = document.createElement('td'),
+        message = document.createElement('td');
+    time.appendChild(document.createTextNode(msg.time));
+    host.appendChild(document.createTextNode(msg.host));
+    severity.appendChild(document.createTextNode(msg.severity));
+    message.appendChild(document.createTextNode(msg.message));
+    row.appendChild(time);
+    row.appendChild(host);
+    row.appendChild(severity);
+    row.appendChild(message);
+    body.insertBefore(row, body.firstChild);
+  }
+})();
   </script>
+  <style type="text/css">
+body {
+  font-family: Helvetica, sans-serif;
+  padding: 2em 1em;
+}
+table#Logs {
+  width: 100%;
+  border-collapse: collapse;
+}
+td, th {
+  text-align: left;
+  padding: 0.25rem 0.5rem;
+  border: solid 1px #ccc;
+}
+  </style>
 </head>
 <body>
-  Look at the console.
+  <table id="Logs">
+    <thead>
+      <tr>
+        <th>Time</th>
+        <th>Host</th>
+        <th>Severity</th>
+        <th>Message</th>
+      </tr>
+    </thead>
+    <tbody>
+    
+    </tbody>
+  </table>
 </body>
 </html>
