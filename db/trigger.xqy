@@ -4,7 +4,12 @@ import module namespace trgr='http://marklogic.com/xdmp/triggers' at '/MarkLogic
 declare variable $trgr:uri as xs:string external;
 declare variable $trgr:trigger as node() external;
 
-let $_ := xdmp:log(xdmp:quote(doc($trgr:uri)))
+(: Yikes! This will cause an infinite loop of logs for log levels. :)
+(: Make sure the minimum syslog threshold is above debug, e.g. config. :)
+let $_ := xdmp:log(
+  xdmp:quote(doc($trgr:uri)),
+  'debug'
+)
 return
   xdmp:http-post("http://localhost:3000/logs",
      <options xmlns="xdmp:http">
