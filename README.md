@@ -6,7 +6,7 @@ A bare-bones, real-time view of MarkLogic logs.
 2. Enable syslog logging for MarkLogic app servers by setting the minimum syslog level in the [Group configuration](http://docs.marklogic.com/guide/admin/groups#id_90097).
 
 ## syslog Server
-Follow the instructions in [marklogic-syslog-server](https://github.com/jmakeig/marklogic-syslog-server) to listen to route syslog messages to the `Logs` database you created above.
+Follow the instructions in [marklogic-syslog-server](https://github.com/jmakeig/marklogic-syslog-server) to route syslog messages to the `Logs` database you created above.
 
 ## Web Server
 1. Start the web server on `localhost` port `3000` with `node marklogic-listener.js`
