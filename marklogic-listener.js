@@ -3,6 +3,8 @@ var path = require('path');
 var express = require('express')
 var app = express()
 
+var bodyParser = require('body-parser')
+
 var cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
@@ -47,23 +49,54 @@ app.use(express.static(path.join(__dirname, 'public')));
 // );
 
 
+var EventEmitter = require('events').EventEmitter;
+var listener = new EventEmitter();
+
 app.get('/', function (req, res) {
   res.send('Hello World!')
 });
 
-app.get('/stream', function (req, res) {
-  res.writeHead(200, {
-    'Content-Type': 'text/event-stream',
-    'Cache-Control': 'no-cache',
-    'Connection': 'keep-alive'
+/**
+ * Write the event stream headers and then wait (?) for messages to be received.
+ */
+app.route('/stream')
+  .get(function(req, res) {
+    res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive'
+    });
+    listener.on('message', function(msg) {
+      writeEvent({
+        event: 'log',
+        data: JSON.stringify(msg)
+      }, res);
+      //res.write('event: log\n');
+      //res.write('id: ' + (++count) + '\n');
+      //res.write('data: '+ JSON.stringify(msg) +'\n\n'); // Note the extra newline
+    });
   });
-  var count = 0;
-  var interval = setInterval(function() {
-    console.log('sending message');
-    res.write('id: ' + (++count) + '\n');
-    res.write('data: asdf\n\n'); // Note the extra newline
-  }, 2000);
-})
+
+/**
+ * Formats writes a dictionary of event data in the format that
+ * server-sent events expects.
+ */
+function writeEvent(event, stream) {
+  for(var p in event) {
+    stream.write(p + ': ' + event[p] + '\n');
+  }
+  stream.write('\n');
+}
+
+/**
+ * Listen for individual messages sent from a MarkLogic trigger.
+ */
+app.post('/logs', bodyParser.json(), function(req, res) {
+  console.log('POST to /logs');
+  listener.emit('message', req.body);
+  res.sendStatus(204);
+  res.end();
+});
 
 var server = app.listen(3000, function () {
   var host = server.address().address
