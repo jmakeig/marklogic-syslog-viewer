@@ -49,10 +49,39 @@ app.use(express.static(path.join(__dirname, 'public')));
 //   }
 // );
 
-var TimedBuffer = require('./timed-buffer.js');
-var buffers = {
-  //"_": new TimedBuffer(1000, 10)
+// TODO: Extract this into a separate module
+
+/**
+ * Creates a hashmap of TimedBuffer instances with session+app keys.
+ */
+var Buffers = function(delay, length) {
+  this.delay = delay || 1000;
+  this.length = length || 25;
+  this.buffers = {};
+}
+/**
+ * Get or create a TimedBuffer for the given session and app.
+ * @param sessionID string
+ * @param appID string
+ * @return TimedBuffer Never undefined
+ */
+Buffers.prototype.get = function(sessionID, appID) {
+  var TimedBuffer = require('./timed-buffer.js');
+  var key = Buffers.key(sessionID, appID);
+  if(!this.buffers[key]) {
+    this.buffers[key] = new TimedBuffer(this.delay, this.length);
+  }
+  return this.buffers[key];
 };
+/**
+ * Encapsulates calculation of compound key.
+ */
+Buffers.key = function(sessionID, appID) {
+  if(!sessionID || !appID) { throw new TypeError('Must provide session and app IDs.'); }
+  return sessionID + ' ' + appID;
+}
+
+var buffers = new Buffers();
 
 app.get('/', function (req, res) {
   res.send('Hello World!')
@@ -60,7 +89,7 @@ app.get('/', function (req, res) {
 
 app.route('/query')
   .get(function(req, res) {
-    buffers[req.sessionID] = new TimedBuffer(1000, 10);
+    //buffers[req.sessionID] = new TimedBuffer(1000, 10);
     
     // TODO: Create or update the query rule for this session. 
     //       What about the case where there multiple tabs for the same session?
@@ -68,11 +97,6 @@ app.route('/query')
     //       The sessionID is private. The browser ID is not. However, they're only
     //       useful together as a compound key.
   });
-
-// TODO: Turn the buffers object into a class with look-up functions.
-function compoundKey(sessionID, appID) {
-  return sessionID + ' ' + appID;
-}
 
 /**
  * Write the event stream headers and then wait (?) for messages to be received.
@@ -83,11 +107,7 @@ app.route('/stream/:appID')
     console.log(req.sessionID);
     var sessionID = '1234567890'; // FIXME: = req.sessionID
     var appID = req.params['appID'];
-    var key = compoundKey(sessionID, appID);
-    if(!buffers[key]) {
-      buffers[key] = new TimedBuffer(1000, 10);
-    }
-    var buffer = buffers[key];
+    var buffer = buffers.get(sessionID, appID);
     
     res.writeHead(200, {
         'Content-Type': 'text/event-stream',
@@ -131,7 +151,7 @@ app.post('/logs/:sessID/:appID', bodyParser.text({type: 'application/json'}), fu
   console.log('POST to %s: %s', req.url, req.body);
   var sessionID = req.params['sessID'];
   var appID = req.params['appID'];
-  buffers[compoundKey(sessionID, appID)].push(req.body);
+  buffers.get(sessionID, appID).push(req.body);
   res.sendStatus(204);
   res.end();
 });
