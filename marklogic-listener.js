@@ -8,6 +8,7 @@ var bodyParser = require('body-parser')
 var cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
+// FIXME: Make this route-specific, not global
 var session = require('express-session');
 app.use(
   session({
@@ -49,18 +50,45 @@ app.use(express.static(path.join(__dirname, 'public')));
 // );
 
 var TimedBuffer = require('./timed-buffer.js');
-var buffer = new TimedBuffer(1000, 10);
+var buffers = {
+  //"_": new TimedBuffer(1000, 10)
+};
 
 app.get('/', function (req, res) {
   res.send('Hello World!')
 });
 
+app.route('/query')
+  .get(function(req, res) {
+    buffers[req.sessionID] = new TimedBuffer(1000, 10);
+    
+    // TODO: Create or update the query rule for this session. 
+    //       What about the case where there multiple tabs for the same session?
+    //       Probably need the key to be sessionID + browser-defined ID
+    //       The sessionID is private. The browser ID is not. However, they're only
+    //       useful together as a compound key.
+  });
+
+// TODO: Turn the buffers object into a class with look-up functions.
+function compoundKey(sessionID, appID) {
+  return sessionID + ' ' + appID;
+}
+
 /**
  * Write the event stream headers and then wait (?) for messages to be received.
  */
-app.route('/stream')
+app.route('/stream/:appID')
   .get(function(req, res) {
-    console.log('Last-Event-ID: %s', req.get('Last-Event-ID'));
+    //console.log('Last-Event-ID: %s', req.get('Last-Event-ID'));
+    console.log(req.sessionID);
+    var sessionID = '1234567890'; // FIXME: = req.sessionID
+    var appID = req.params['appID'];
+    var key = compoundKey(sessionID, appID);
+    if(!buffers[key]) {
+      buffers[key] = new TimedBuffer(1000, 10);
+    }
+    var buffer = buffers[key];
+    
     res.writeHead(200, {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
@@ -99,9 +127,11 @@ function writeEvent(event, stream) {
 /**
  * Listen for individual messages sent from a MarkLogic trigger.
  */
-app.post('/logs', bodyParser.text({type: 'application/json'}), function(req, res) {
-  console.log('POST to /logs: %s', req.body);
-  buffer.push(req.body);
+app.post('/logs/:sessID/:appID', bodyParser.text({type: 'application/json'}), function(req, res) {
+  console.log('POST to %s: %s', req.url, req.body);
+  var sessionID = req.params['sessID'];
+  var appID = req.params['appID'];
+  buffers[compoundKey(sessionID, appID)].push(req.body);
   res.sendStatus(204);
   res.end();
 });

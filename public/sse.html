@@ -5,10 +5,10 @@
   <title>Log Viewer</title>
   <script type="text/javascript">
 (function() {
+  var appID = 'dummy';
   document.addEventListener('DOMContentLoaded', function(e) {
 
-
-    var source = new EventSource('/stream');
+    var source = new EventSource('/stream/' + appID);
 
     source.addEventListener('log', function(e) {
       var msg = JSON.parse(e.data);

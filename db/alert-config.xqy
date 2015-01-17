@@ -69,13 +69,14 @@ import module namespace alert = "http://marklogic.com/xdmp/alert" at "/MarkLogic
 declare namespace log = "http://marklogic.com/jmakeig/logs";
 
 let $rule := alert:make-rule(
-  "session-1234", 
-  "Callback for session-1234",
+  "session-1234567890", 
+  "Callback for session-1234567890",
   0, (: equivalent to xdmp:user(xdmp:get-current-user()) :)
   cts:word-query("asdf"),
   "push-http", (: action :)
   <alert:options>
-    <log:session>1234</log:session>
+    <log:session>1234567890</log:session>
+    <log:app>dummy</log:app>
   </alert:options>)
 return
   alert:rule-insert("logs-alert-config", $rule)
