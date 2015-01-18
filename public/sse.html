@@ -4,23 +4,44 @@
   <meta charset="utf-8" />
   <title>Log Viewer</title>
   <script type="text/javascript" src="EventEmitter2.js"></script>
+  <script type="text/javascript" src="util.js"></script>
+  <script type="text/javascript" src="array-proxy.js"></script>
   <script src="http://fb.me/react-0.12.2.js"></script>
   <script src="http://fb.me/JSXTransformer-0.12.2.js"></script>
   <script type="text/javascript">
 (function() {
   function LogApp() {
-    var guid = (function() {
-      function s4() {
-        return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
-      }
-      return function() {
-        return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
-      };
-    })();
-  
-    this.id = guid();
-    this.messages = [];
-    this.query = '';
+    var _id = util.guid();
+    Object.defineProperty(this, 'id', {
+      get: function() { return _id; },
+      enumerable: true
+    });
+    
+    
+    var _query = ''; // Private state
+    Object.defineProperty(this, 'query', {
+      get: function() { return _query; },
+      set: function(q) {
+        _query = q;
+        this.emit('query');
+      },
+      enumerable: true
+    });
+    
+    var _messages = ArrayProxy.proxy([], messagesChangeHandler); // Private state
+    function messagesChangeHandler(e) {
+      console.log(e.type);
+      this.emit('messages:' + e.type);
+    }
+    Object.defineProperty(this, 'messages', {
+      get: function() { return _messages; },
+      set: function(ms) {
+        if(!Array.isArray(ms)) { throw new TypeError('Must be an Array'); }
+        _messages = ArrayProxy.proxy(ms, messagesChangeHandler);
+        this.emit('messages:set');
+      },
+      enumerable: true
+    });
   }
   //LogApp.prototype = Object.clone(EventEmitter.prototype);
   LogApp.prototype = Object.create(EventEmitter2.prototype);
@@ -36,7 +57,7 @@
     }, false);
 
     source.addEventListener('batch', function(e) {
-      console.log(e.data);
+      // console.log(e.data);
       var batch = JSON.parse(e.data);
       //console.dir(msg);
       that.emit('log:batch', batch);
@@ -49,13 +70,17 @@
     source.onerror = function(e) {
       console.dir(e);
       this.close();
-      throw new Error();  
     }
+  }
+  LogApp.prototype.query = function(qs) {
+    console.log(qs);
   }
   
   /****************************************/
   var app = new LogApp();
   console.log('New app with id ' + app.id);
+  
+  app.on('query', function() { console.log(this.query);});
   
   // FIXME: Get a real UI framework to do the rendering. This is awful.
   app.on('log:received', function(msg) {
@@ -90,6 +115,12 @@
 
   document.addEventListener('DOMContentLoaded', function(e) {
     app.initializeStream();
+    
+    var form = document.querySelector('form#Search');
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      app.query = form.querySelector('input').value;
+    });
   }, false);
 })();
   </script>
@@ -110,6 +141,10 @@ td, th {
   </style>
 </head>
 <body>
+  <form id="Search">
+    <input type="text" name="q"/>
+    <button>Search</button>
+  </form>
   <table id="Logs">
     <thead>
       <tr>
