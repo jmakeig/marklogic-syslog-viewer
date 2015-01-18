@@ -30,26 +30,44 @@
       enumerable: true
     });
     
-    var _messages = ArrayProxy.proxy([], messagesChangeHandler); // Private state
+    var _messages = ArrayProxy.proxy([], messagesChangeHandler.bind(this)); // Private state
     function messagesChangeHandler(e, args) {
       console.log(e.type);
       var messages = args;
       switch(e.type) {
+        case 'push':
         case 'unshift': // unshift allows passing multiple arguments
-          messages = Array.prototype.slice.call(arguments, 1);
+          that.emit('messages:changed', Array.prototype.slice.call(arguments, 1));  // Arguments less the event
+          break;
+        case 'concat':
+        case 'join':
+        case 'slice': // None of these changes the array
           break;
         default:
-          messages = args;
+          this.emit('messages:changed');
+          break;
       }
-      console.dir(messages);
-      that.emit('messages:changed', messages);
     }
     Object.defineProperty(this, 'messages', {
       get: function() { return _messages; },
       set: function(ms) {
         if(!Array.isArray(ms)) { throw new TypeError('Must be an Array'); }
-        _messages = ArrayProxy.proxy(ms, messagesChangeHandler);
-        this.emit('messages:set', _messages);
+        _messages = ArrayProxy.proxy(ms, messagesChangeHandler.bind(this));
+        //this.emit('messages:set', _messages);
+        this.emit('messages:changed');
+      },
+      enumerable: true
+    });
+    
+    var _maxWindowLength = 250;
+    Object.defineProperty(this, 'maxWindowLength', {
+      get: function() { return _maxWindowLength; },
+      set: function(value) {
+        if('number' !== typeof value || value < 1) { throw new TypeError('maxWindowLength must be a non-zero, positive number'); }
+        this.messages.splice( // splice, unlike, slice modifies in-place
+          value, // start
+          this.messages.length - (Math.min(value, this.messages.length) - 1) // number to delete
+        );
       },
       enumerable: true
     });
@@ -92,46 +110,53 @@
   }
   
   /****************************************/
-  var app = new LogApp();
+  var app = new LogApp(); 
+  window.app = app; // DEBUG
   console.log('New app with id ' + app.id);
   
   app.on('query', function() { console.log(this.query);});
   
   // FIXME: Get a real UI framework to do the rendering. This is awful.
-  app.on('messages:changed', function(msg) {
-    var msgs = [].concat.apply([], [msg]);
-    // FIXME: Need to handle Array
-    var body = document.querySelector('table#Logs > tbody');
-    for(var i = 0; i < msgs.length; i++) {
-      var msg = msgs[i];
-      body.insertBefore(renderRow(msg), body.firstChild);
-    }
-  });
   
-  app.on('messages:set', function(msgs) {
+  var messageChangeHandler = (function(msgs) {
+    renderMessages(this.messages);
+  }).bind(app);
+   
+  //app.on('messages:set', messageChangeHandler);
+  app.on('messages:changed', messageChangeHandler);
+  
+  
+  
+  function renderMessages(msgs) {
     var body = document.querySelector('table#Logs > tbody');
+    var table = body.parentNode;
+    table.removeChild(body);
+    body = document.createElement('tbody');
     for(var i = 0; i < msgs.length; i++) {
       var msg = msgs[i];
       body.appendChild(renderRow(msg));
     }
-  });
-  
-  function renderRow(msg) {
-    var row = document.createElement('tr');
-    var time = document.createElement('td'),
-        host = document.createElement('td'),
-        severity = document.createElement('td'),
-        message = document.createElement('td');
-    time.appendChild(document.createTextNode(msg.time));
-    host.appendChild(document.createTextNode(msg.host));
-    severity.appendChild(document.createTextNode(msg.severity));
-    message.appendChild(document.createTextNode(msg.message));
-    row.appendChild(time);
-    row.appendChild(host);
-    row.appendChild(severity);
-    row.appendChild(message);
-    return row;
+    table.appendChild(body);
+    
+    function renderRow(msg) {
+      var row = document.createElement('tr');
+      var time = document.createElement('td'),
+          host = document.createElement('td'),
+          severity = document.createElement('td'),
+          message = document.createElement('td');
+      time.appendChild(document.createTextNode(msg.time));
+      host.appendChild(document.createTextNode(msg.host));
+      severity.appendChild(document.createTextNode(msg.severity));
+      message.appendChild(document.createTextNode(msg.message));
+      row.appendChild(time);
+      row.appendChild(host);
+      row.appendChild(severity);
+      row.appendChild(message);
+      return row;
+    }
   }
+  
+  
 
   document.addEventListener('DOMContentLoaded', function(e) {
     app.initializeStream();

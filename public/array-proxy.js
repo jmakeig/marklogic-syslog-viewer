@@ -1,12 +1,14 @@
 var ArrayProxy = { // namespace
   // AOP pre-invocation advice. Returns a function.
-  wrap: function(f, h, that) {
-    var scope = that || this;
+  wrap: function(f, h, arr, that) {
+    var scope = that || null; // this is ArrayProxy 
     return function() {
       //console.dir(arguments);
-      if(false !== h.apply(scope, arguments)) {
-        return f.apply(scope, arguments);
-      }
+      //if(false !== h.apply(scope, arguments)) {
+        var ret = f.apply(arr, arguments);
+        h.apply(scope, arguments);
+        return ret;
+      //}
     }
   },
  
@@ -31,7 +33,8 @@ var ArrayProxy = { // namespace
                 [{type: p}].concat(args)
               ); // TODO: Create/reuse proper event type
             }, 
-            arr
+            arr, 
+            that
           )
         }
       }
