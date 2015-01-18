@@ -3,7 +3,8 @@ var ArrayProxy = { // namespace
   wrap: function(f, h, that) {
     var scope = that || this;
     return function() {
-      if(false !== h.apply(scope)) {
+      //console.dir(arguments);
+      if(false !== h.apply(scope, arguments)) {
         return f.apply(scope, arguments);
       }
     }
@@ -13,7 +14,7 @@ var ArrayProxy = { // namespace
   // that calls a handler before calling calling the actual Array
   // function. Returning false from the handler allows cancellation
   // of the proxied invocation. 
-  proxy: function(arr, handler) {
+  proxy: function(arr, handler, that) {
     if(!Array.isArray(arr)) throw new TypeError('Can\'t proxy something that isn\'t an Array.');
     if('function' !== typeof handler) return arr;
     var Ap = Array.prototype;
@@ -23,7 +24,12 @@ var ArrayProxy = { // namespace
           arr[p] = ArrayProxy.wrap(
             Ap[p], 
             function() { // FIXME: This is probably slow
-              return handler.apply(arr, [{type: p}]); // TODO: Create/reuse proper event type
+              var args = Array.prototype.slice.call(arguments, 0);
+              //console.log([{dummy: true}].concat(args));
+              return handler.apply(
+                that || arr, 
+                [{type: p}].concat(args)
+              ); // TODO: Create/reuse proper event type
             }, 
             arr
           )

@@ -11,6 +11,8 @@
   <script type="text/javascript">
 (function() {
   function LogApp() {
+    var that = this;
+    
     var _id = util.guid();
     Object.defineProperty(this, 'id', {
       get: function() { return _id; },
@@ -29,16 +31,25 @@
     });
     
     var _messages = ArrayProxy.proxy([], messagesChangeHandler); // Private state
-    function messagesChangeHandler(e) {
+    function messagesChangeHandler(e, args) {
       console.log(e.type);
-      this.emit('messages:' + e.type);
+      var messages = args;
+      switch(e.type) {
+        case 'unshift': // unshift allows passing multiple arguments
+          messages = Array.prototype.slice.call(arguments, 1);
+          break;
+        default:
+          messages = args;
+      }
+      console.dir(messages);
+      that.emit('messages:changed', messages);
     }
     Object.defineProperty(this, 'messages', {
       get: function() { return _messages; },
       set: function(ms) {
         if(!Array.isArray(ms)) { throw new TypeError('Must be an Array'); }
         _messages = ArrayProxy.proxy(ms, messagesChangeHandler);
-        this.emit('messages:set');
+        this.emit('messages:set', _messages);
       },
       enumerable: true
     });
@@ -47,25 +58,29 @@
   LogApp.prototype = Object.create(EventEmitter2.prototype);
   LogApp.prototype.initializeStream = function(url) {
     var that = this;
+    
+    // FIXME: Is this the right place to do this?
+    var that = this;
     url = (url || '/stream/') + this.id;
     var source = new EventSource(url);
 
     source.addEventListener('log', function(e) {
       var msg = JSON.parse(e.data);
-      //console.dir(msg);
-      that.emit('log:received', msg);
-    }, false);
+      that.messages.unshift(msg);
+    });
 
     source.addEventListener('batch', function(e) {
-      // console.log(e.data);
+      //console.log(e.data);
       var batch = JSON.parse(e.data);
-      //console.dir(msg);
-      that.emit('log:batch', batch);
-    }, false);
+      // if(batch.length > 0) {
+      //   that.messages.unshift.apply(that.messages, batch); // In-place concat
+      // }
+      that.messages = batch;
+    });
 
     source.addEventListener('open', function(e) {
       console.log('Opened connection');
-    }, false);
+    });
 
     source.onerror = function(e) {
       console.dir(e);
@@ -83,12 +98,17 @@
   app.on('query', function() { console.log(this.query);});
   
   // FIXME: Get a real UI framework to do the rendering. This is awful.
-  app.on('log:received', function(msg) {
+  app.on('messages:changed', function(msg) {
+    var msgs = [].concat.apply([], [msg]);
+    // FIXME: Need to handle Array
     var body = document.querySelector('table#Logs > tbody');
-    body.insertBefore(renderRow(msg), body.firstChild);
+    for(var i = 0; i < msgs.length; i++) {
+      var msg = msgs[i];
+      body.insertBefore(renderRow(msg), body.firstChild);
+    }
   });
   
-  app.on('log:batch', function(msgs) {
+  app.on('messages:set', function(msgs) {
     var body = document.querySelector('table#Logs > tbody');
     for(var i = 0; i < msgs.length; i++) {
       var msg = msgs[i];
