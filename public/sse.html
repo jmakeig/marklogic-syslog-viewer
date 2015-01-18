@@ -11,14 +11,13 @@
   <script type="text/javascript">
 (function() {
   function LogApp() {
-    var that = this;
-    
+  
     var _id = util.guid();
     Object.defineProperty(this, 'id', {
-      get: function() { return _id; },
-      enumerable: true
+      value: _id,
+      enumerable: true,
+      writable: false
     });
-    
     
     var _query = ''; // Private state
     Object.defineProperty(this, 'query', {
@@ -37,7 +36,7 @@
       switch(e.type) {
         case 'push':
         case 'unshift': // unshift allows passing multiple arguments
-          that.emit('messages:changed', Array.prototype.slice.call(arguments, 1));  // Arguments less the event
+          this.emit('messages:changed', Array.prototype.slice.call(arguments, 1));  // Arguments less the event
           break;
         case 'concat':
         case 'join':
@@ -72,7 +71,6 @@
       enumerable: true
     });
   }
-  //LogApp.prototype = Object.clone(EventEmitter.prototype);
   LogApp.prototype = Object.create(EventEmitter2.prototype);
   LogApp.prototype.initializeStream = function(url) {
     var that = this;
