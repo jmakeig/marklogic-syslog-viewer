@@ -56,6 +56,11 @@ app.get('/', function (req, res) {
   res.send('Hello World!')
 });
 
+var marklogic = require('marklogic');
+var conn = require('./marklogic-config.js').connection;
+var db = marklogic.createDatabaseClient(conn);
+var qb = marklogic.queryBuilder;
+
 app.route('/query')
   .get(function(req, res) {
     //buffers[req.sessionID] = new TimedBuffer(1000, 10);
@@ -76,13 +81,34 @@ app.route('/stream/:appID')
     console.log(req.sessionID);
     var sessionID = '1234567890'; // FIXME: = req.sessionID
     var appID = req.params['appID'];
-    var buffer = buffers.get(sessionID, appID);
     
     res.writeHead(200, {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
         'Connection': 'keep-alive'
     });
+    
+    db.documents.query(
+      qb.where(
+        qb.byExample(
+          {
+            message: { $word: 'asdf' }
+          }   
+        )
+      )
+      .orderBy(
+        qb.sort('time', 'descending')
+      )
+      .slice(1, 50)
+    )
+      .result(function(response) {
+        writeEvent({
+          event: 'batch',
+          data: JSON.stringify(response.map(function(r) { return r.content; })) // FIXME: Why do I have to JSON.stringify here?
+        }, res);
+      });
+    
+    var buffer = buffers.get(sessionID, appID);
     buffer.on('flush', function(msgs) {
       msgs.forEach(function(msg) {
         writeEvent({

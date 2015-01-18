@@ -4,6 +4,8 @@
   <meta charset="utf-8" />
   <title>Log Viewer</title>
   <script type="text/javascript" src="EventEmitter2.js"></script>
+  <script src="http://fb.me/react-0.12.2.js"></script>
+  <script src="http://fb.me/JSXTransformer-0.12.2.js"></script>
   <script type="text/javascript">
 (function() {
   function LogApp() {
@@ -33,6 +35,13 @@
       that.emit('log:received', msg);
     }, false);
 
+    source.addEventListener('batch', function(e) {
+      console.log(e.data);
+      var batch = JSON.parse(e.data);
+      //console.dir(msg);
+      that.emit('log:batch', batch);
+    }, false);
+
     source.addEventListener('open', function(e) {
       console.log('Opened connection');
     }, false);
@@ -48,8 +57,21 @@
   var app = new LogApp();
   console.log('New app with id ' + app.id);
   
+  // FIXME: Get a real UI framework to do the rendering. This is awful.
   app.on('log:received', function(msg) {
     var body = document.querySelector('table#Logs > tbody');
+    body.insertBefore(renderRow(msg), body.firstChild);
+  });
+  
+  app.on('log:batch', function(msgs) {
+    var body = document.querySelector('table#Logs > tbody');
+    for(var i = 0; i < msgs.length; i++) {
+      var msg = msgs[i];
+      body.appendChild(renderRow(msg));
+    }
+  });
+  
+  function renderRow(msg) {
     var row = document.createElement('tr');
     var time = document.createElement('td'),
         host = document.createElement('td'),
@@ -63,8 +85,8 @@
     row.appendChild(host);
     row.appendChild(severity);
     row.appendChild(message);
-    body.insertBefore(row, body.firstChild);
-  });
+    return row;
+  }
 
   document.addEventListener('DOMContentLoaded', function(e) {
     app.initializeStream();
