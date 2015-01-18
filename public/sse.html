@@ -13,13 +13,16 @@
   function LogApp() {
   
     var _id = util.guid();
+    var _messages = ArrayProxy.proxy([], messagesChangeHandler.bind(this)); // Private state
+    var _maxWindowLength = 250;
+    var _query = ''; // Private state
+    
     Object.defineProperty(this, 'id', {
       value: _id,
       enumerable: true,
       writable: false
     });
     
-    var _query = ''; // Private state
     Object.defineProperty(this, 'query', {
       get: function() { return _query; },
       set: function(q) {
@@ -29,9 +32,50 @@
       enumerable: true
     });
     
-    var _messages = ArrayProxy.proxy([], messagesChangeHandler.bind(this)); // Private state
+    Object.defineProperty(this, 'messages', {
+      get: function() { return _messages; },
+      set: function(ms) {
+        if(!Array.isArray(ms)) { throw new TypeError('Must be an Array'); }
+        _messages = ArrayProxy.proxy(
+          truncateInPlace(ms, _maxWindowLength),
+          messagesChangeHandler.bind(this)
+        );
+        //this.emit('messages:set', _messages);
+        this.emit('messages:changed');
+      },
+      enumerable: true
+    });
+    
+    function truncateInPlace(arr, maxLength, silent /* If true, subverts proxy to not fire change event */) {
+      maxLength = maxLength || _maxWindowLength;
+      silent = !!silent;
+      // Call the Array.prototype version, not the proxy in silent mode
+      var splice = silent ? Array.prototype.splice : arr.splice;
+      // splice, unlike, slice modifies in-place
+      splice.call(
+        arr,
+        maxLength, // start
+        arr.length - (Math.min(maxLength, arr.length) - 1) // number to delete
+      );
+      return arr;        
+    }
+    
+    Object.defineProperty(this, 'maxWindowLength', {
+      get: function() { return _maxWindowLength; },
+      set: function(value) {
+        if('number' !== typeof value || value < 1) { throw new TypeError('maxWindowLength must be a non-zero, positive number'); }
+        if(value < _maxWindowLength) {
+          truncateInPlace(this.messages, value);
+        }
+        _maxWindowLength = value;
+        this.emit('maxwindowlength:changed');
+      },
+      enumerable: true
+    });
+    
     function messagesChangeHandler(e, args) {
       console.log(e.type);
+      truncateInPlace(_messages, _maxWindowLength, true);
       var messages = args;
       switch(e.type) {
         case 'push':
@@ -47,29 +91,6 @@
           break;
       }
     }
-    Object.defineProperty(this, 'messages', {
-      get: function() { return _messages; },
-      set: function(ms) {
-        if(!Array.isArray(ms)) { throw new TypeError('Must be an Array'); }
-        _messages = ArrayProxy.proxy(ms, messagesChangeHandler.bind(this));
-        //this.emit('messages:set', _messages);
-        this.emit('messages:changed');
-      },
-      enumerable: true
-    });
-    
-    var _maxWindowLength = 250;
-    Object.defineProperty(this, 'maxWindowLength', {
-      get: function() { return _maxWindowLength; },
-      set: function(value) {
-        if('number' !== typeof value || value < 1) { throw new TypeError('maxWindowLength must be a non-zero, positive number'); }
-        this.messages.splice( // splice, unlike, slice modifies in-place
-          value, // start
-          this.messages.length - (Math.min(value, this.messages.length) - 1) // number to delete
-        );
-      },
-      enumerable: true
-    });
   }
   LogApp.prototype = Object.create(EventEmitter2.prototype);
   LogApp.prototype.initializeStream = function(url) {
@@ -86,11 +107,7 @@
     });
 
     source.addEventListener('batch', function(e) {
-      //console.log(e.data);
       var batch = JSON.parse(e.data);
-      // if(batch.length > 0) {
-      //   that.messages.unshift.apply(that.messages, batch); // In-place concat
-      // }
       that.messages = batch;
     });
 
