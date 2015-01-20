@@ -88,25 +88,28 @@ app.route('/stream/:appID')
         'Connection': 'keep-alive'
     });
     
-    db.documents.query(
-      qb.where(
-        qb.byExample(
-          {
-            message: { $word: 'asdf' }
-          }   
+    if(!req.get('Last-Event-ID')) {
+      db.documents.query(
+        qb.where(
+          qb.byExample(
+            {
+              message: { $word: 'asdf' }
+            }   
+          )
         )
+        .orderBy(
+          qb.sort('time', 'descending')
+        )
+        .slice(1, 50)
       )
-      .orderBy(
-        qb.sort('time', 'descending')
-      )
-      .slice(1, 50)
-    )
-      .result(function(response) {
-        writeEvent({
-          event: 'batch',
-          data: JSON.stringify(response.map(function(r) { return r.content; })) // FIXME: Why do I have to JSON.stringify here?
-        }, res);
-      });
+        .result(function(response) {
+          writeEvent({
+            event: 'batch',
+            data: JSON.stringify(response.map(function(r) { return r.content; })), // FIXME: Why do I have to JSON.stringify here?
+            id: 'batch'
+          }, res);
+        });
+    }
     
     var buffer = buffers.get(sessionID, appID);
     buffer.on('flush', function(msgs) {
