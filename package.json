@@ -21,7 +21,7 @@
     "cors": "^2.5.2",
     "express": "^4.11.0",
     "express-session": "^1.10.1",
-    "marklogic": "^1.0.0-ea3",
+    "marklogic": "marklogic/node-client-api#develop",
     "passport": "^0.2.1",
     "passport-http": "^0.2.2",
     "passport-local": "^1.0.0",
