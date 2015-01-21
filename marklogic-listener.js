@@ -75,12 +75,13 @@ app.route('/query')
 /**
  * Write the event stream headers and then wait (?) for messages to be received.
  */
-app.route('/stream/:appID')
+app.route('/stream/:appID') // ?q=query+string
   .get(function(req, res) {
     //console.log('Last-Event-ID: %s', req.get('Last-Event-ID'));
     console.log(req.sessionID);
     var sessionID = req.sessionID;
     var appID = req.params['appID'];
+    var query = req.query['q'];
     
     res.writeHead(200, {
         'Content-Type': 'text/event-stream',
@@ -93,7 +94,7 @@ app.route('/stream/:appID')
         qb.where(
           qb.byExample(
             {
-              message: { $word: 'asdf' }
+              message: { $word: query }
             }   
           )
         )
@@ -118,7 +119,7 @@ app.route('/stream/:appID')
       documents: [
         {
           contentType: 'application/json',
-          content: { query: 'asdf' } 
+          content: { query: query } 
         }
       ]
     }).result(function(response) {

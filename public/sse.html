@@ -28,7 +28,7 @@
       get: function() { return _query; },
       set: function(q) {
         _query = q;
-        this.emit('query');
+        this.emit('query:changed');
       },
       enumerable: true
     });
@@ -96,7 +96,7 @@
     Object.defineProperty(this, 'isListening', {
       get: function() { return _isListening; },
       set: function(value) {
-        _query = value;
+        _isListening = value;
         this.emit('islistening:changed');
       },
       enumerable: true
@@ -109,22 +109,30 @@
     if(null === model || 'undefined' === typeof model) { throw new TypeError(); }
     
     this.model = model;
-    this.streamBaseURL = '/stream/';
+    this.eventSource = null;
     
-    
-    var messageChangeHandler = (function(msgs) {
+    function messageChangeHandler(msgs) {
       renderMessages(this.model.messages);
-    }).bind(this);
+    };
    
-    //app.on('messages:set', messageChangeHandler);
-    model.on('messages:changed', messageChangeHandler);
+    model.on('messages:changed', messageChangeHandler.bind(this));
+
+    function queryChangeHandler(query) {
+      this.eventSource.close();
+      this.initializeStream();
+    }    
+    model.on('query:changed', queryChangeHandler.bind(this));
   }
   // FIXME: This is mixing concerns
   LogController.prototype.initializeStream = function() {
-    var url = this.streamBaseURL + this.model.id;
-    var source = new EventSource(url);
-
+    var url = '/stream/' + this.model.id + 
+      (this.model.query ? '?q=' + encodeURIComponent(this.model.query) : '');
+    //console.log(url);
+    this.eventSource = new EventSource(url);
+    
     var that = this;
+    var source = this.eventSource;
+    
     source.addEventListener('log', function(e) {
       var msg = JSON.parse(e.data);
       that.model.messages.unshift(msg);
@@ -136,7 +144,8 @@
     });
 
     source.addEventListener('open', function(e) {
-      console.log('Opened connection');
+      //console.dir(this);
+      console.log('Listening on ' + this.url);
     });
 
     source.onerror = function(e) {
@@ -182,8 +191,6 @@
       return row;
     }
   }
-  
-  
 
   document.addEventListener('DOMContentLoaded', function(e) {
     controller.initializeStream();
@@ -191,7 +198,7 @@
     var form = document.querySelector('form#Search');
     form.addEventListener('submit', function(e) {
       e.preventDefault();
-      app.query = form.querySelector('input').value;
+      model.query = form.querySelector('input').value;
     });
   }, false);
 })();
