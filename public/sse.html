@@ -15,7 +15,8 @@
     var _id = util.guid();
     var _messages = ArrayProxy.proxy([], messagesChangeHandler.bind(this)); // Private state
     var _maxWindowLength = 250;
-    var _query = ''; // Private state
+    var _query = '';
+    var _isListening = true;
     
     Object.defineProperty(this, 'id', {
       value: _id,
@@ -91,8 +92,19 @@
           break;
       }
     }
+    
+    Object.defineProperty(this, 'isListening', {
+      get: function() { return _isListening; },
+      set: function(value) {
+        _query = value;
+        this.emit('islistening:changed');
+      },
+      enumerable: true
+    });
   }
   LogApp.prototype = Object.create(EventEmitter2.prototype);
+  
+  // FIXME: This is mixing concerns
   LogApp.prototype.initializeStream = function(url) {
     var that = this;
     
@@ -140,7 +152,7 @@
   //app.on('messages:set', messageChangeHandler);
   app.on('messages:changed', messageChangeHandler);
   
-  
+  //app.on('islistening:changed', function(e) { app.initializeStream(); });
   
   function renderMessages(msgs) {
     var body = document.querySelector('table#Logs > tbody');

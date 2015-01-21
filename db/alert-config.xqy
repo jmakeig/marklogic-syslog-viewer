@@ -32,13 +32,34 @@ import module namespace alert = "http://marklogic.com/xdmp/alert"
 let $action := alert:make-action(
     "push-http", 
     "Push log message over HTTP",
-    xdmp:modules-database(),
-    xdmp:modules-root(), 
-    "/actions/logs-push-http.xqy",
+    xdmp:database(),
+    "", 
+    "logs-alert-config/action-push-http.xqy",
     <alert:options/> )
 return
   alert:action-insert("logs-alert-config", $action)
   
+;
+xquery version "1.0-ml";
+xdmp:document-load(
+  (: TODO: This relies on the current app server config :)
+  xdmp:modules-root() || "/actions/logs-push-http.xqy",
+  <options xmlns="xdmp:document-load">
+    <uri>logs-alert-config/action-push-http.xqy</uri>
+    <format>text</format>
+    <permissions>
+      {(
+        xdmp:permission('alert-internal', 'read'),
+        xdmp:permission('alert-internal', 'update'),
+        xdmp:permission('alert-internal', 'insert')
+      )}
+    </permissions>
+    <collections>
+      <collection>logs-alert-config</collection>
+      <collection>http://marklogic.com/xdmp/alert</collection>
+    </collections>
+  </options>
+)
 ;
 
 xquery version "1.0-ml";
@@ -64,6 +85,8 @@ return alert:config-insert(
 
 ;
 
+(: Example rule :)
+(:
 xquery version "1.0-ml";
 import module namespace alert = "http://marklogic.com/xdmp/alert" at "/MarkLogic/alert.xqy";
 declare namespace log = "http://marklogic.com/jmakeig/logs";
@@ -80,3 +103,4 @@ let $rule := alert:make-rule(
   </alert:options>)
 return
   alert:rule-insert("logs-alert-config", $rule)
+:)

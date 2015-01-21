@@ -79,7 +79,7 @@ app.route('/stream/:appID')
   .get(function(req, res) {
     //console.log('Last-Event-ID: %s', req.get('Last-Event-ID'));
     console.log(req.sessionID);
-    var sessionID = '1234567890'; // FIXME: = req.sessionID
+    var sessionID = req.sessionID;
     var appID = req.params['appID'];
     
     res.writeHead(200, {
@@ -88,7 +88,7 @@ app.route('/stream/:appID')
         'Connection': 'keep-alive'
     });
     
-    if(!req.get('Last-Event-ID')) {
+    //if(!req.get('Last-Event-ID')) {
       db.documents.query(
         qb.where(
           qb.byExample(
@@ -100,7 +100,7 @@ app.route('/stream/:appID')
         .orderBy(
           qb.sort('time', 'descending')
         )
-        .slice(1, 50)
+        .slice(1, 50) // FIXME: Set this from the UI
       )
         .result(function(response) {
           writeEvent({
@@ -109,9 +109,28 @@ app.route('/stream/:appID')
             id: 'batch'
           }, res);
         });
-    }
+    //}
+    
+    // This is intentionally run concurrently with the query (if the query runs at all)
+    db.resources.put({
+      name: 'alerts', 
+      params: { 'sessionID': sessionID, 'appID': appID },
+      documents: [
+        {
+          contentType: 'application/json',
+          content: { query: 'asdf' } 
+        }
+      ]
+    }).result(function(response) {
+      //console.log(response);
+      console.log('created alert for session (%s) and app (%s) with query (%s)', sessionID, appID, 'query');
+    }, function(error) {
+      console.log(JSON.stringify(error, null, 2));
+    });
+
     
     var buffer = buffers.get(sessionID, appID);
+    console.dir(Object.keys(buffers.buffers));
     buffer.on('flush', function(msgs) {
       msgs.forEach(function(msg) {
         writeEvent({
@@ -149,9 +168,16 @@ app.post('/logs/:sessID/:appID', bodyParser.text({type: 'application/json'}), fu
   console.log('POST to %s: %s', req.url, req.body);
   var sessionID = req.params['sessID'];
   var appID = req.params['appID'];
-  buffers.get(sessionID, appID).push(req.body);
-  res.sendStatus(204);
-  res.end();
+  if(buffers.has(sessionID, appID)) {
+    buffers.get(sessionID, appID).push(req.body);
+    res.sendStatus(204);
+    res.end();
+  } else {
+    // If the session doesn't exist, alert the client to delete the rule.
+    // TODO: Is this logic correct?
+    res.sendStatus(404);
+    res.end();
+  }
 });
 
 var server = app.listen(3000, function () {
