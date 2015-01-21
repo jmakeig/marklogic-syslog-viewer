@@ -1,3 +1,5 @@
+//declareUpdate(); // 
+
 // FIXME: <http://bugtrack.marklogic.com/30921> and <http://docs.marklogic.com/guide/app-dev/import_modules#id_29407>
 //var resource = require('./resource-helper.sjs'); 
 var resource = {}
@@ -36,13 +38,19 @@ function put(context, params, input) {
   var sessionID = params['sessionID'];
   var appID = params['appID'];
   var query = cts.andQuery([]); // Defaults to everything
+
   
-  xdmp.log('CREATING ALERT IN EXTENSION');
-  if(input && input.root && input.root.query) { 
+  
+  if(input && input.root && null !== input.root.toObject().query) { 
     //throw new TypeError('Need to specify a query'); 
-    query = input.root.query;
+    query = input.root.toObject().query;
+    xdmp.log('Query below:', 'debug');
+    xdmp.log(query, 'debug');
+    // FIXME: I need to support more sophisticated queries here
     query = cts.wordQuery(query);
   }
+  
+  xdmp.log('CREATING ALERT IN EXTENSION for query: ' + query);
   
   // <alert:options>
   //   <log:session>1234567890</log:session>
@@ -59,6 +67,9 @@ function put(context, params, input) {
   xdmp.log('Creating rule for session: ' 
     + sessionID + ' app: ' + appID + ' query: ' + query, 'debug');
   
+  // Clear out the existing rules for the session+app combo
+  removeRules(sessionID, appID);
+  
   var rule = alert.makeRule(
    appID + ' ' + sessionID,    //$name as xs:string,
    '',                         //$description as xs:string,
@@ -73,6 +84,26 @@ function put(context, params, input) {
   );
   return null;
 };
+
+function removeRules(sessionID, appID) {
+  var xQuery = [
+    'declare namespace a = "http://marklogic.com/xdmp/alert";',
+    'declare namespace l = "http://marklogic.com/jmakeig/logs";',
+    'declare variable $appID as xs:string external;',
+    'declare variable $sessID as xs:string external;',
+    'collection("logs-alert-config")',
+    '/a:rule[a:options/l:app = $appID and a:options/l:session = $sessID]/@id']
+      .join('\n');
+  var vars = {
+    'sessID': sessionID, 
+    'appID': appID, 
+  }
+  
+
+  for(var id of xdmp.xqueryEval(xQuery, vars)) {
+    alert.ruleRemove('logs-alert-config', id.toString());
+  }
+}
 
 
 

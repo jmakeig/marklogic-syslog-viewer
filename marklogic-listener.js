@@ -81,7 +81,7 @@ app.route('/stream/:appID') // ?q=query+string
     console.log(req.sessionID);
     var sessionID = req.sessionID;
     var appID = req.params['appID'];
-    var query = req.query['q'];
+    var query = req.query['q'] || null;
     
     res.writeHead(200, {
         'Content-Type': 'text/event-stream',
@@ -90,14 +90,17 @@ app.route('/stream/:appID') // ?q=query+string
     });
     
     //if(!req.get('Last-Event-ID')) {
+      var where = qb.byExample(
+        {
+          message: { $word: query }
+        }   
+      );
+      if(null === query) {
+        where = qb.and();
+      }
+      console.log(where);
       db.documents.query(
-        qb.where(
-          qb.byExample(
-            {
-              message: { $word: query }
-            }   
-          )
-        )
+        qb.where(where)
         .orderBy(
           qb.sort('time', 'descending')
         )
