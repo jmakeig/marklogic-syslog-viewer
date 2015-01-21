@@ -180,13 +180,14 @@
           host = document.createElement('td'),
           severity = document.createElement('td'),
           message = document.createElement('td');
+      if(msg.severity) { severity.classList.add('severity', msg.severity.toLowerCase()); }
+      severity.appendChild(document.createTextNode(msg.severity));
       time.appendChild(document.createTextNode(msg.time));
       host.appendChild(document.createTextNode(msg.host));
-      severity.appendChild(document.createTextNode(msg.severity));
       message.appendChild(document.createTextNode(msg.message));
+      row.appendChild(severity);
       row.appendChild(time);
       row.appendChild(host);
-      row.appendChild(severity);
       row.appendChild(message);
       return row;
     }
@@ -217,6 +218,46 @@ td, th {
   padding: 0.25rem 0.5rem;
   border: solid 1px #ccc;
 }
+
+.severity {
+  text-indent: -1000px;
+}
+.severity.emergency {
+  background-color: #43000C;
+}
+.severity.alert {
+  background-color: #720013;
+}
+.severity.critical {
+  background-color: #9B001C;
+}
+.severity.error {
+  background-color: #CF0638;
+}
+.severity.warn {
+  background-color: #FA6632;
+}
+.severity.notice {
+  background-color: #0A6789;
+}
+.severity.info {
+  background-color: #0A6789;
+}
+.severity.config {
+  background-color: #FECD23;
+}
+.severity.debug {
+  background-color: #0A996F;
+}
+.severity.fine {
+  background-color: #DEE7E7;
+}
+.severity.finer {
+  background-color: #DEE7E7;
+}
+.severity.finest {
+  background-color: #DEE7E7;
+}
   </style>
 </head>
 <body>
@@ -225,12 +266,19 @@ td, th {
     <button>Search</button>
   </form>
   <table id="Logs">
+    <caption>Logs</caption>
+    <colgroup>
+      <col class="severity"/>
+      <col class="time"/>
+      <col class="host"/>
+      <col class="message"/>
+    </colgroup>
     <thead>
       <tr>
-        <th>Time</th>
-        <th>Host</th>
-        <th>Severity</th>
-        <th>Message</th>
+        <th class="severity">&nbsp;</th>
+        <th class="time">Time</th>
+        <th class="host">Host</th>
+        <th class="message">Message</th>
       </tr>
     </thead>
     <tbody>
