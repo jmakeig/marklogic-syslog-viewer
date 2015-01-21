@@ -21,6 +21,13 @@ Buffers.prototype.get = function(sessionID, appID) {
   return this.buffers[key];
 };
 /**
+ * Whether the collection has an entry for the key.
+ * @return boolean
+ */
+Buffers.prototype.has = function(sessionID, appID) {
+  return !!this.buffers[Buffers.key(sessionID, appID)];
+}
+/**
  * Encapsulates calculation of compound key.
  */
 Buffers.key = function(sessionID, appID) {
