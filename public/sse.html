@@ -104,23 +104,35 @@
   }
   LogApp.prototype = Object.create(EventEmitter2.prototype);
   
-  // FIXME: This is mixing concerns
-  LogApp.prototype.initializeStream = function(url) {
-    var that = this;
+  /****************************************/
+  function LogController(model) {
+    if(null === model || 'undefined' === typeof model) { throw new TypeError(); }
     
-    // FIXME: Is this the right place to do this?
-    var that = this;
-    url = (url || '/stream/') + this.id;
+    this.model = model;
+    this.streamBaseURL = '/stream/';
+    
+    
+    var messageChangeHandler = (function(msgs) {
+      renderMessages(this.model.messages);
+    }).bind(this);
+   
+    //app.on('messages:set', messageChangeHandler);
+    model.on('messages:changed', messageChangeHandler);
+  }
+  // FIXME: This is mixing concerns
+  LogController.prototype.initializeStream = function() {
+    var url = this.streamBaseURL + this.model.id;
     var source = new EventSource(url);
 
+    var that = this;
     source.addEventListener('log', function(e) {
       var msg = JSON.parse(e.data);
-      that.messages.unshift(msg);
+      that.model.messages.unshift(msg);
     });
 
     source.addEventListener('batch', function(e) {
       var batch = JSON.parse(e.data);
-      that.messages = batch;
+      that.model.messages = batch;
     });
 
     source.addEventListener('open', function(e) {
@@ -132,27 +144,15 @@
       this.close();
     }
   }
-  LogApp.prototype.query = function(qs) {
-    console.log(qs);
-  }
   
   /****************************************/
-  var app = new LogApp(); 
-  window.app = app; // DEBUG
-  console.log('New app with id ' + app.id);
+  var model = new LogApp(); 
+  window.model = model; // DEBUG
+  console.log('New model with id ' + model.id);
   
-  app.on('query', function() { console.log(this.query);});
+  var controller = new LogController(model);
   
   // FIXME: Get a real UI framework to do the rendering. This is awful.
-  
-  var messageChangeHandler = (function(msgs) {
-    renderMessages(this.messages);
-  }).bind(app);
-   
-  //app.on('messages:set', messageChangeHandler);
-  app.on('messages:changed', messageChangeHandler);
-  
-  //app.on('islistening:changed', function(e) { app.initializeStream(); });
   
   function renderMessages(msgs) {
     var body = document.querySelector('table#Logs > tbody');
@@ -186,7 +186,7 @@
   
 
   document.addEventListener('DOMContentLoaded', function(e) {
-    app.initializeStream();
+    controller.initializeStream();
     
     var form = document.querySelector('form#Search');
     form.addEventListener('submit', function(e) {
