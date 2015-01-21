@@ -78,7 +78,7 @@ app.route('/query')
 app.route('/stream/:appID') // ?q=query+string
   .get(function(req, res) {
     //console.log('Last-Event-ID: %s', req.get('Last-Event-ID'));
-    console.log(req.sessionID);
+    //console.log(req.sessionID);
     var sessionID = req.sessionID;
     var appID = req.params['appID'];
     var query = req.query['q'] || null;
@@ -98,7 +98,7 @@ app.route('/stream/:appID') // ?q=query+string
       if(null === query) {
         where = qb.and();
       }
-      console.log(where);
+      //console.log(where);
       db.documents.query(
         qb.where(where)
         .orderBy(
@@ -127,14 +127,15 @@ app.route('/stream/:appID') // ?q=query+string
       ]
     }).result(function(response) {
       //console.log(response);
-      console.log('created alert for session (%s) and app (%s) with query (%s)', sessionID, appID, 'query');
+      console.log('created alert for session (%s) and app (%s) with query (%s)', sessionID, appID, query);
     }, function(error) {
       console.log(JSON.stringify(error, null, 2));
     });
 
     
     var buffer = buffers.get(sessionID, appID);
-    console.dir(Object.keys(buffers.buffers));
+    //console.dir(Object.keys(buffers.buffers));
+    console.log('Subscribing to buffer %s', Buffers.key(sessionID, appID));
     buffer.on('flush', function(msgs) {
       msgs.forEach(function(msg) {
         writeEvent({
@@ -169,10 +170,11 @@ function writeEvent(event, stream) {
  * Listen for individual messages sent from a MarkLogic trigger.
  */
 app.post('/logs/:sessID/:appID', bodyParser.text({type: 'application/json'}), function(req, res) {
-  console.log('POST to %s: %s', req.url, req.body);
+  // console.log('POST to %s: %s', req.url, req.body);
   var sessionID = req.params['sessID'];
   var appID = req.params['appID'];
   if(buffers.has(sessionID, appID)) {
+    console.log('Received message for buffer %s', Buffers.key(sessionID, appID));
     buffers.get(sessionID, appID).push(req.body);
     res.sendStatus(204);
     res.end();
