@@ -41,6 +41,7 @@ function put(context, params, input) {
   if(input && input.root && input.root.query) { 
     //throw new TypeError('Need to specify a query'); 
     query = input.root.query;
+    query = cts.wordQuery(query);
   }
   
   // <alert:options>
@@ -57,12 +58,12 @@ function put(context, params, input) {
   context.outputTypes = ['application/json'];
   xdmp.log('Creating rule for session: ' 
     + sessionID + ' app: ' + appID + ' query: ' + query, 'debug');
-   
+  
   var rule = alert.makeRule(
    appID + ' ' + sessionID,    //$name as xs:string,
    '',                         //$description as xs:string,
    0,                          //$user-id as xs:unsignedLong,
-   cts.wordQuery('asdf'),       //$query as cts:query,
+   query,                      //$query as cts:query,
    'push-http',                //$action as xs:string,
    nb.toNode()                 //$options as element(alert:options)
   ); //as element(alert:rule)
