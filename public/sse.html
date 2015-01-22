@@ -177,16 +177,19 @@
     function renderRow(msg) {
       var row = document.createElement('tr');
       var time = document.createElement('td'),
+          sender = document.createElement('td'),
           host = document.createElement('td'),
           severity = document.createElement('td'),
           message = document.createElement('td');
       if(msg.severity) { severity.classList.add('severity', msg.severity.toLowerCase()); }
       severity.appendChild(document.createTextNode(msg.severity));
       time.appendChild(document.createTextNode(msg.time));
+      sender.appendChild(document.createTextNode(msg.sender));
       host.appendChild(document.createTextNode(msg.host));
       message.appendChild(document.createTextNode(msg.message));
       row.appendChild(severity);
       row.appendChild(time);
+      row.appendChild(sender);
       row.appendChild(host);
       row.appendChild(message);
       return row;
@@ -270,6 +273,7 @@ td, th {
     <colgroup>
       <col class="severity"/>
       <col class="time"/>
+      <col class="sender"/>
       <col class="host"/>
       <col class="message"/>
     </colgroup>
@@ -277,6 +281,7 @@ td, th {
       <tr>
         <th class="severity">&nbsp;</th>
         <th class="time">Time</th>
+        <th class="time">Sender</th>
         <th class="host">Host</th>
         <th class="message">Message</th>
       </tr>
