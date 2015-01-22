@@ -61,17 +61,6 @@ var conn = require('./marklogic-config.js').connection;
 var db = marklogic.createDatabaseClient(conn);
 var qb = marklogic.queryBuilder;
 
-app.route('/query')
-  .get(function(req, res) {
-    //buffers[req.sessionID] = new TimedBuffer(1000, 10);
-    
-    // TODO: Create or update the query rule for this session. 
-    //       What about the case where there multiple tabs for the same session?
-    //       Probably need the key to be sessionID + browser-defined ID
-    //       The sessionID is private. The browser ID is not. However, they're only
-    //       useful together as a compound key.
-  });
-
 /**
  * Write the event stream headers and then wait (?) for messages to be received.
  */
@@ -96,7 +85,7 @@ app.route('/stream/:appID') // ?q=query+string
         }   
       );
       if(null === query) {
-        where = qb.and();
+        where = qb.and(); // Everything
       }
       //console.log(where);
       db.documents.query(
