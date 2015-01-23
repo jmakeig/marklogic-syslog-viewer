@@ -1,3 +1,61 @@
+xquery version "1.0-ml";
+import module namespace admin = "http://marklogic.com/xdmp/admin" at "/MarkLogic/admin.xqy";
+
+let $config := admin:get-configuration()
+return 
+  if(not(admin:database-exists($config, "Logs-Triggers"))) then
+    let $config := admin:database-copy($config, xdmp:database("Triggers"), "Logs-Triggers")
+    return admin:save-configuration(
+      $config
+    )
+  else $config
+
+;
+
+xquery version "1.0-ml";
+import module namespace admin = "http://marklogic.com/xdmp/admin" at "/MarkLogic/admin.xqy";
+
+let $config := admin:get-configuration()
+return 
+  if(not(admin:forest-exists($config, "Logs-Triggers"))) then
+    admin:save-configuration(
+      admin:forest-create($config, "Logs-Triggers", xdmp:host(), ())
+    )
+  else $config
+;
+
+xquery version "1.0-ml";
+import module namespace admin = "http://marklogic.com/xdmp/admin" at "/MarkLogic/admin.xqy";
+
+
+let $config := admin:get-configuration()
+return 
+  if(admin:forest-exists($config, "Logs-Triggers")) then
+    admin:save-configuration(
+      admin:database-attach-forest(
+        $config,
+        xdmp:database("Logs-Triggers"),
+        xdmp:forest("Logs-Triggers")
+      )
+    )
+  else $config
+  
+;
+
+xquery version "1.0-ml";
+import module namespace admin = "http://marklogic.com/xdmp/admin" at "/MarkLogic/admin.xqy";
+
+let $config := admin:get-configuration()
+return 
+  admin:save-configuration(
+    admin:database-set-triggers-database(
+      $config,
+      xdmp:database("Logs"),
+      xdmp:database("Logs-Triggers")
+    ) 
+  )
+;
+
 (:
 xquery version "1.0-ml";
 xdmp:forest-clear(
@@ -9,6 +67,7 @@ xdmp:forest-clear(
 
 ;
 :)
+
 xquery version "1.0-ml";
 import module namespace alert = "http://marklogic.com/xdmp/alert" at "/MarkLogic/alert.xqy";
 
@@ -42,8 +101,7 @@ return
 ;
 xquery version "1.0-ml";
 xdmp:document-load(
-  (: TODO: This relies on the current app server config :)
-  xdmp:modules-root() || "/actions/logs-push-http.xqy",
+  "/Users/jmakeig/Workspaces/log-viewer/db/modules/actions/logs-push-http.xqy",
   <options xmlns="xdmp:document-load">
     <uri>logs-alert-config/action-push-http.xqy</uri>
     <format>text</format>
@@ -51,7 +109,9 @@ xdmp:document-load(
       {(
         xdmp:permission('alert-internal', 'read'),
         xdmp:permission('alert-internal', 'update'),
-        xdmp:permission('alert-internal', 'insert')
+        xdmp:permission('alert-internal', 'insert'),
+        xdmp:permission('alert-internal', 'execute'),
+        xdmp:permission('logs-reader', 'execute')
       )}
     </permissions>
     <collections>
