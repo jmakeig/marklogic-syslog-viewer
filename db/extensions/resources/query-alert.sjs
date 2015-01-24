@@ -37,9 +37,7 @@ function get(context, params) {
 function put(context, params, input) {
   var sessionID = params['sessionID'];
   var appID = params['appID'];
-  var query = cts.andQuery([]); // Defaults to everything
-
-  
+  var query = cts.collectionQuery('logs'); // Defaults to everything
   
   if(input && input.root && null !== input.root.toObject().query) { 
     //throw new TypeError('Need to specify a query'); 
