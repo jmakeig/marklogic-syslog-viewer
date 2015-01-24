@@ -85,7 +85,7 @@ app.route('/stream/:appID') // ?q=query+string
         }   
       );
       if(null === query) {
-        where = qb.and(); // Everything
+        where = qb.collection('logs'); // Everything
       }
       //console.log(where);
       db.documents.query(
