@@ -1,11 +1,39 @@
-var dev =  {
+var writer =  {
   database: "Logs",
   host: "localhost",
   port: 3033,
-  user: "logs-writer", // TODO: Expose reader too
+  user: "logs-writer",
   password: "********",
   authType: "DIGEST"
 }
+
+var reader =  {
+  database: "Logs",
+  host: "localhost",
+  port: 3033,
+  user: "logs-reader",
+  password: "********",
+  authType: "DIGEST"
+}
+
+var admin =  {
+  database: "Logs",
+  host: "localhost",
+  port: 3033,
+  user: "logs-admin", 
+  password: "********",
+  authType: "DIGEST"
+}
+
+var sudo =  {
+  database: "Logs",
+  host: "localhost",
+  port: 3033,
+  user: "admin", 
+  password: "********",
+  authType: "DIGEST"
+}
+
 
 var OLD =  {
   database: "Logs",
@@ -16,15 +44,11 @@ var OLD =  {
   authType: "DIGEST"
 }
 
-// Another connection. Change the module.exports below to 
-// use it without having to change consuming code.
-var test =  {
-  database: "Documents",
-  host: "acceptance.example.com",
-  port: 9116,
-  user: "app-writer",
-  password: "********",
-  authType: "DIGEST"
+module.exports = {
+  connection: sudo,
+  reader: reader,
+  writer: writer,
+  admin: admin
 }
-
-module.exports.connection = dev;
+module.exports.sudo = admin;
+module.exports.connection = sudo;
