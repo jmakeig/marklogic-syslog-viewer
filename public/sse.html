@@ -6,14 +6,14 @@
   <script type="text/javascript" src="EventEmitter2.js"></script>
   <script type="text/javascript" src="util.js"></script>
   <script type="text/javascript" src="array-proxy.js"></script>
-  <script src="http://fb.me/react-0.12.2.js"></script>
-  <script src="http://fb.me/JSXTransformer-0.12.2.js"></script>
+  <!-- <script src="http://fb.me/react-0.12.2.js"></script> -->
+  <!-- <script src="http://fb.me/JSXTransformer-0.12.2.js"></script> -->
   <script type="text/javascript">
 (function() {
   function LogApp() {
   
     var _id = util.guid();
-    var _messages = ArrayProxy.proxy([], messagesChangeHandler.bind(this)); // Private state
+    var _messages = ArrayProxy.proxy([], messagesChangeHandler.bind(this));
     var _maxWindowLength = 250;
     var _query = '';
     var _isListening = true;
@@ -91,6 +91,7 @@
           this.emit('messages:changed');
           break;
       }
+      console.log(this.messages.length + ' total. Latest: ' + this.messages[0].message.time);
     }
     
     Object.defineProperty(this, 'isListening', {
@@ -182,7 +183,8 @@
           severity = document.createElement('td'),
           message = document.createElement('td');
       if(msg.severity) { severity.classList.add('severity', msg.severity.toLowerCase()); }
-      severity.appendChild(document.createTextNode(msg.severity));
+      //severity.appendChild(document.createTextNode(msg.severity));
+      severity.setAttribute('data-severity', msg.severity);
       time.appendChild(document.createTextNode(msg.time));
       sender.appendChild(document.createTextNode(msg.sender));
       host.appendChild(document.createTextNode(msg.host));
@@ -221,9 +223,8 @@ td, th {
   padding: 0.25rem 0.5rem;
   border: solid 1px #ccc;
 }
-
-.severity {
-  text-indent: -1000px;
+col.severity {
+  width: 2px;
 }
 .severity.emergency {
   background-color: #43000C;
@@ -237,7 +238,7 @@ td, th {
 .severity.error {
   background-color: #CF0638;
 }
-.severity.warn {
+.severity.warning {
   background-color: #FA6632;
 }
 .severity.notice {
@@ -279,11 +280,11 @@ td, th {
     </colgroup>
     <thead>
       <tr>
-        <th class="severity">&nbsp;</th>
-        <th class="time">Time</th>
-        <th class="time">Sender</th>
-        <th class="host">Host</th>
-        <th class="message">Message</th>
+        <th class="">&nbsp;</th>
+        <th class="">Time</th>
+        <th class="">Sender</th>
+        <th class="">Host</th>
+        <th class="">Message</th>
       </tr>
     </thead>
     <tbody>
