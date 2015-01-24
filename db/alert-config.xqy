@@ -24,9 +24,9 @@ return
   else $config
 ;
 
+(:
 xquery version "1.0-ml";
 import module namespace admin = "http://marklogic.com/xdmp/admin" at "/MarkLogic/admin.xqy";
-
 
 let $config := admin:get-configuration()
 return 
@@ -41,7 +41,7 @@ return
   else $config
   
 ;
-
+:)
 xquery version "1.0-ml";
 import module namespace admin = "http://marklogic.com/xdmp/admin" at "/MarkLogic/admin.xqy";
 
@@ -92,8 +92,8 @@ let $action := alert:make-action(
     "push-http", 
     "Push log message over HTTP",
     xdmp:database(),
-    "", 
-    "logs-alert-config/action-push-http.xqy",
+    "logs-alert-config", 
+    "/action-push-http.xqy",
     <alert:options/> )
 return
   alert:action-insert("logs-alert-config", $action)
