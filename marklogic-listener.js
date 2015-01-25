@@ -126,17 +126,20 @@ app.route('/stream/:appID') // ?q=query+string
     //console.dir(Object.keys(buffers.buffers));
     console.log('Subscribing to buffer %s', Buffers.key(sessionID, appID));
     buffer.on('flush', function(msgs) {
-      msgs.forEach(function(msg) {
-        writeEvent({
-          event: 'log',
-          data: msg, 
-          // If the connection to the server is dropped, a special HTTP header (Last-Event-ID) 
-          // is set with the new request. This lets the browser determine which event is 
-          // appropriate to fire. The message event contains a e.lastEventId property.
-          // <http://www.html5rocks.com/en/tutorials/eventsource/basics/>
-          id: msg.time // Use the message's timestamp as the last identifier
-        }, res);
-      });
+      //console.log('Buffer session %s, app %s', this.session, this.app);
+      if(sessionID === this.session && appID === this.app) {
+        msgs.forEach(function(msg) {
+          writeEvent({
+            event: 'log',
+            data: msg, 
+            // If the connection to the server is dropped, a special HTTP header (Last-Event-ID) 
+            // is set with the new request. This lets the browser determine which event is 
+            // appropriate to fire. The message event contains a e.lastEventId property.
+            // <http://www.html5rocks.com/en/tutorials/eventsource/basics/>
+            id: msg.time // Use the message's timestamp as the last identifier
+          }, res);
+        });
+      }
     });
   });
 

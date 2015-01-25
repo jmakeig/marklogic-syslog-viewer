@@ -17,6 +17,8 @@ Buffers.prototype.get = function(sessionID, appID) {
   var key = Buffers.key(sessionID, appID);
   if(!this.buffers[key]) {
     this.buffers[key] = new TimedBuffer(this.delay, this.length);
+    this.buffers[key].session = sessionID;
+    this.buffers[key].app = appID;
   }
   return this.buffers[key];
 };

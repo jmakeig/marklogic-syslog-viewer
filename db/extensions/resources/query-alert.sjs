@@ -48,7 +48,7 @@ function put(context, params, input) {
     query = cts.wordQuery(query);
   }
   
-  xdmp.log('CREATING ALERT IN EXTENSION for query: ' + query);
+  xdmp.log('CREATING ALERT IN EXTENSION for query: ' + query, 'debug');
   
   // <alert:options>
   //   <log:session>1234567890</log:session>
@@ -97,8 +97,8 @@ function removeRules(sessionID, appID) {
     'appID': appID, 
   }
   
-
   for(var id of xdmp.xqueryEval(xQuery, vars)) {
+    xdmp.log('Removing rule ' + id.toString());
     alert.ruleRemove('logs-alert-config', id.toString());
   }
 }
