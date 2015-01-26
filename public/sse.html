@@ -58,6 +58,12 @@
         maxLength, // start
         arr.length - (Math.min(maxLength, arr.length) - 1) // number to delete
       );
+      Array.prototype.sort.call(arr, function(a, b) {
+        var a = new Date(a.time);
+        var b = new Date(b.time);
+        
+        return b - a;
+      });
       return arr;        
     }
     
@@ -186,6 +192,7 @@
       //severity.appendChild(document.createTextNode(msg.severity));
       severity.setAttribute('data-severity', msg.severity);
       time.appendChild(document.createTextNode(msg.time));
+      time.setAttribute('data-time', msg.time);
       sender.appendChild(document.createTextNode(msg.sender));
       host.appendChild(document.createTextNode(msg.host));
       message.appendChild(document.createTextNode(msg.message));
