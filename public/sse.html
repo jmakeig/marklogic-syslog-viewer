@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <title>Log Viewer</title>
+  <script type="text/javascript" src="lib/number-tolocalestring.js"></script>
   <script type="text/javascript" src="EventEmitter2.js"></script>
   <script type="text/javascript" src="util.js"></script>
   <script type="text/javascript" src="array-proxy.js"></script>
@@ -122,7 +123,7 @@
     this.eventSource = null;
     
     function messageChangeHandler(msgs) {
-      renderMessages(this.model.messages);
+      renderMessages(this.model.messages, window.navigator.userLanguage || window.navigator.language);
     };
    
     model.on('messages:changed', messageChangeHandler.bind(this));
@@ -173,7 +174,7 @@
   
   // FIXME: Get a real UI framework to do the rendering. This is awful.
   
-  function renderMessages(msgs) {
+  function renderMessages(msgs, locale) {
     var body = document.querySelector('table#Logs > tbody');
     var table = body.parentNode;
     table.removeChild(body);
@@ -184,7 +185,7 @@
     }
     table.appendChild(body);
     
-    function renderRow(msg, nextMsg) {
+    function renderRow(msg, nextMsg, locale) {
       var TIMESTAMP = 'HH:mm:ss, YYYY-MM-DD';
       var row = document.createElement('tr');
       var time = document.createElement('td'),
@@ -204,7 +205,7 @@
           currentTime.diff(
             moment(nextMsg.time)
           )
-        ).asSeconds() + '';
+        ).asSeconds().toLocaleString(locale);
       }
       diff.appendChild(document.createTextNode(diffStr));
       diff.classList.add('diff');
