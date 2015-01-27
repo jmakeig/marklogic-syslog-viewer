@@ -51,7 +51,7 @@ th .key {
   font-weight: lighter;
 }
 td.message {
-  max-width: 100px;
+  max-width: 10em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
