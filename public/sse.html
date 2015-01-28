@@ -247,6 +247,39 @@
     <div class="control search"><input type="text" name="q" /></div>
     <div class="control submit"><button>Search</button></div>
   </form>
+  <form id="Facets">
+    <div class="facet hosts">
+      <h3>Hosts</h3>
+      <ol>
+        <li><input type="checkbox"/> ex1.example.com (15,839)</li>
+        <li><input type="checkbox"/> qa.some-other.com (4,402)</li>
+        <li><input type="checkbox"/> ex2.example.com (189)</li>
+        <li><input type="checkbox"/> ex3.example.com (5)</li>
+        <li><input type="checkbox"/> ex4.example.com (0)</li>
+      </ol>
+    </div>
+    <div class="facet senders">
+      <h3>Sender</h3>
+      <ol>
+        <li><input type="checkbox"/> MarkLogic</li>
+        <li><input type="checkbox"/> Node.js</li>
+      </ol>
+    </div>
+    <div class="facet severities">
+      <h3>Severity</h3>
+      <ol>
+        <li><input type="checkbox"/> Critical</li>
+        <li><input type="checkbox"/> Alert</li>
+        <li><input type="checkbox"/> Error</li>
+        <li><input type="checkbox"/> Notice</li>
+        <li><input type="checkbox"/> Info</li>
+        <li><input type="checkbox"/> Debug</li>
+      </ol>
+    </div>
+    <!--<div class="facet date-range">
+      
+    </div>-->
+  </form>
   <table id="Logs">
     <caption>Logs</caption>
     <colgroup>
