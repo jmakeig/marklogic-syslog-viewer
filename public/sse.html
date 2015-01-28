@@ -224,6 +224,7 @@
       row.appendChild(sender);
       row.appendChild(host);
       row.appendChild(message);
+      // row.classList.add('flash'); // Since we're redrawing each time, no way to figure out the new ones
       return row;
     }
   }
@@ -243,8 +244,8 @@
 </head>
 <body>
   <form id="Search">
-    <input type="text" name="q"/>
-    <button>Search</button>
+    <div class="control search"><input type="text" name="q" /></div>
+    <div class="control submit"><button>Search</button></div>
   </form>
   <table id="Logs">
     <caption>Logs</caption>
@@ -266,9 +267,7 @@
         <th class="message">Message</th>
       </tr>
     </thead>
-    <tbody>
-    
-    </tbody>
+    <tbody></tbody>
   </table>
 </body>
 </html>
