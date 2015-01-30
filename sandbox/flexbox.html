@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Flexbox</title>
+  <style type="text/css">
+* { box-sizing: border-box; }
+html, body {
+  margin:0;
+  padding: 0;
+  height: 100vh;
+}
+body {
+  display: flex;
+  display: -webkit-flex;
+  flex-direction: column;
+  -webkit-flex-direction: column;
+}
+header, nav, article {
+  width: 100%;
+}
+header {
+  flex: 0 1 auto;
+  -webkit-flex: 0 1 auto;
+}
+nav {
+  flex: 0 1 auto;
+  -webkit-flex: 0 1 auto;
+}
+
+article {
+  flex: 1;
+  -webkit-flex: 1;
+  overflow-y: scroll;
+  
+  padding: 1em;
+}
+footer {
+  flex: 0 1 auto;
+  -webkit-flex: 0 1 auto;
+}
+
+/* Search */
+form#Search {
+  width: 100%;
+  display: flex;
+  display: -webkit-flex;
+  flex-direction: row;
+  -webkit-flex-direction: row;
+}
+.control {}
+.search {
+  flex: 80%;
+  -webkit-flex: 80%;
+  margin-right: 1em;
+  /* -webkit-align-self: stretch; */
+}
+.control.search input {
+  width: 100%;
+}
+.control.submit {
+  flex: 1 3em 3em;
+  -webkit-flex: 1 3em 3em; /* grow shrink basis*/
+}
+
+/* Facets */
+form#Facets {
+
+  width: 100%;
+  display: flex;
+  display: -webkit-flex;
+  flex-direction: row;
+  -webkit-flex-direction: row;
+  
+}
+
+.facet {
+  padding: 0.25em;
+  margin-right: 4em;
+  /* outline: solid 1px red; */
+}
+
+
+/*****************************************/
+
+header, footer, nav {
+  padding: 0.5em 1em;
+}
+
+nav {
+  padding-bottom: 1px;
+}
+article {
+  padding-top: 0;
+}
+
+body {
+  font-family: Helvetica, sans-serif;
+}
+table td, code {
+  font-family: Inconsolata, Consolas, sans-serif;
+}
+h1, h2, h3, h4, h5, h6 {
+  line-height: 1;
+  margin: 0;
+}
+header h1 {
+  font-size: 1.25em;
+}
+header, footer {
+  background-color: #333;
+  color: #fff;
+}
+footer {
+  font-size: 85%;
+}
+table {
+  table-layout: fixed;
+  border-collapse: collapse;
+  width: 100%;
+}
+th, td {
+  padding: 0.25em;
+  border: solid 1px #333;
+}
+th {
+  background: #333;
+  color: #fff;
+  text-align: left;
+  font-weight: normal;
+}
+td.message {
+  max-width: 10em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+col.severity {
+  width: 0.65em;
+}
+col.time {
+  width: 11.5em;
+}
+col.diff {
+  width: 4em;
+}
+col.sender {
+  width: 7em;
+}
+col.host {
+  width: 10em;
+}
+col.message {
+  
+}
+  </style>
+</head>
+<body>
+  <header><h1>MarkLogic <code>syslog</code> viewer</h1></header>
+  <nav>
+    <form id="Search">
+      <div class="control search"><input type="text" name="q" /></div>
+      <div class="control submit"><button>Search</button></div>
+    </form>
+    <form id="Facets">
+      <div class="facet hosts">
+        <h3>Hosts</h3>
+        <ol>
+          <li><input type="checkbox"/> ex1.example.com (15,839)</li>
+          <li><input type="checkbox"/> qa.some-other.com (4,402)</li>
+          <li><input type="checkbox"/> ex2.example.com (189)</li>
+          <li><input type="checkbox"/> ex3.example.com (5)</li>
+          <li><input type="checkbox"/> ex4.example.com (0)</li>
+        </ol>
+      </div>
+      <div class="facet senders">
+        <h3>Sender</h3>
+        <ol>
+          <li><input type="checkbox"/> MarkLogic</li>
+          <li><input type="checkbox"/> Node.js</li>
+        </ol>
+      </div>
+      <div class="facet severities">
+        <h3>Severity</h3>
+        <ol>
+          <li><input type="checkbox"/> Critical</li>
+          <li><input type="checkbox"/> Alert</li>
+          <li><input type="checkbox"/> Error</li>
+          <li><input type="checkbox"/> Notice</li>
+          <li><input type="checkbox"/> Info</li>
+          <li><input type="checkbox"/> Debug</li>
+        </ol>
+      </div>
+      <!--<div class="facet date-range">
+      
+      </div>-->
+    </form>
+    <table>
+      <colgroup>
+        <col class="time"/>
+        <col class="sender"/>
+        <col class="host"/>
+        <col class="message"/>
+      </colgroup>
+      <thead>
+        <tr>
+          <th class="time">Time</th>
+          <th class="sender">Sender</th>
+          <th class="host">Host</th>
+          <th class="message">Message</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </nav>
+  <article>
+    <table>
+      <colgroup>
+        <col class="time"/>
+        <col class="sender"/>
+        <col class="host"/>
+        <col class="message"/>
+      </colgroup>
+      <!--thead>
+        <tr>
+          <th>Time</th>
+          <th>Sender</th>
+          <th>Host</th>
+          <th>Message</th>
+        </tr>
+      </thead-->
+      <tbody>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+          <tr><td class="time">05:59:50, 2015-01-29</td><td class="sender">MarkLogic</td><td class="host">trans1.example.com</td><td class="message">LockMeter::update detected backwards time prevPreciseTime=14225399928371630 currPreciseTime=14225399900972110</td></tr>
+
+      </tbody>
+    </table>
+  </article>
+  <footer>Last message received at <code>05:59:50, 2015-01-29</code></footer>
+</body>
+</html>
