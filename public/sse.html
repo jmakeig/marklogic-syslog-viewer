@@ -122,8 +122,14 @@
     this.model = model;
     this.eventSource = null;
     
-    function messageChangeHandler(msgs) {
+    function messageChangeHandler(/*msgs*/) {
       renderMessages(this.model.messages, window.navigator.userLanguage || window.navigator.language);
+      var count = document.querySelector('footer .messages-count');
+      //console.log(this.model.messages.length + ' message' + (this.model.messages.length > 1 ? 's' : ''));
+      count.textContent = 'Showing ' 
+        + this.model.messages.length 
+        + ' message' 
+        + (this.model.messages.length > 1 ? 's' : '');
     };
    
     model.on('messages:changed', messageChangeHandler.bind(this));
