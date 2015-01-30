@@ -2,47 +2,40 @@
  * Layout                            *
  *************************************/
 
-* { box-sizing: border-box; }
-
-html, body {
-  margin: 0;
-  padding: 0;
-}
-
 /* Page layout */
-/*
+* { box-sizing: border-box; }
+html, body {
+  margin:0;
+  padding: 0;
+  height: 100vh;
+}
 body {
   display: flex;
   display: -webkit-flex;
   flex-direction: column;
   -webkit-flex-direction: column;
 }
-body > header, body > div#Body, body > footer {
-  border: solid 1px red;
+header, nav, article {
   width: 100%;
 }
-body > header {
-  -webkit-align-self: flex-start;
-  -webkit-flex: 1;
+header {
+  flex: 0 1 auto;
+  -webkit-flex: 0 1 auto;
 }
-body > div#Body {
-  -webkit-flex: 1;
-  position: relative;
+nav {
+  flex: 0 1 auto;
+  -webkit-flex: 0 1 auto;
 }
 
-body > div#Body > div {
-  overflow: scroll;
-  
-  width: 100%;
-  height: 100%;
-  position: absolute;
-}
-body > footer {
-  -webkit-align-self: flex-end;
+article {
+  flex: 1;
   -webkit-flex: 1;
-  margin: auto;
+  overflow-y: scroll;
 }
-*/
+footer {
+  flex: 0 1 auto;
+  -webkit-flex: 0 1 auto;
+}
 
 /* Search */
 form#Search {
@@ -69,13 +62,13 @@ form#Search {
 
 /* Facets */
 form#Facets {
+
   width: 100%;
   display: flex;
   display: -webkit-flex;
   flex-direction: row;
   -webkit-flex-direction: row;
   
-  /* -webkit-justify-content: space-around; */
 }
 
 .facet {
@@ -83,6 +76,18 @@ form#Facets {
   margin-right: 4em;
   /* outline: solid 1px red; */
 }
+
+header, nav, article, footer {  
+  padding: 0.5em 1em;
+}
+nav {
+  padding-bottom: 0;
+}
+article {
+  padding-top: 0;
+  margin-top: -1px;
+}
+
 
 /*************************************
  * Aesthetics                        *
@@ -95,8 +100,17 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.1;
   margin: 0;
 }
+header h1 {
+  font-size: 1.25em;
+}
+header {
+  border-bottom: solid 1px #ccc;
+}
+footer {
+  border-top: solid 1px #ccc;
+}
 form#Search {
-  margin: 0.5em 0;
+
 }
 form#Search input {
   font-size: 1.55em;
@@ -116,10 +130,13 @@ form#Search button {
   background: #ddd;
   color: #444;
 }
+form#Facets {
+  margin-top: 0.5em;
+}
 form#Facets ol {
   list-style-type: none;
   padding: 0;
-  margin: 0.5em 0;
+  margin-top: 0.5em 0;
 }
 form#Facets ol li {
   margin-bottom: 0.25em;
