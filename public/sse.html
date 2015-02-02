@@ -11,218 +11,10 @@
   <!-- <script src="http://fb.me/react-0.12.2.js"></script> -->
   <!-- <script src="http://fb.me/JSXTransformer-0.12.2.js"></script> -->
   <script type="text/javascript" src="lib/moment.js"></script>
+  <script type="text/javascript" src="LogsModel.js"></script>
+  <script type="text/javascript" src="LogsController.js"></script>
   <script type="text/javascript">
 (function() {
-  function LogApp() {
-    var _state = {
-      'id': util.guid(),
-      'maxWindowLength': 250,
-      'query': '',
-      'facets': undefined, // ?
-      'isListening': true
-    }
-    // Transient state
-    var _messages = undefined; // Transient state populated later based on other state. //ArrayProxy.proxy([], messagesChangeHandler.bind(this));
-    
-    Object.defineProperty(this, 'id', {
-      value: _state.id,
-      enumerable: true,
-      writable: false
-    });
-    
-    Object.defineProperty(this, 'query', {
-      get: function() { return _state.query; },
-      set: function(q) {
-        this.emit('query:changed', _state.query = q);
-      },
-      enumerable: true
-    });
-    
-    Object.defineProperty(this, 'facets', {
-      get: function() { return _state.facets; },
-      set: function(value) {
-        if(!Array.isArray(value)) { throw new TypeError('Must be an Array'); }
-        _state.facets = value; // FIXME: ?
-        this.emit('facets:changed');
-      },
-      enumerable: true
-    });
-    
-    Object.defineProperty(this, 'messages', {
-      get: function() { return _messages; },
-      set: function(ms) {
-        if(!Array.isArray(ms)) { throw new TypeError('Must be an Array'); }
-        _messages = ArrayProxy.proxy(
-          truncateInPlace(ms, this.maxWindowLength),
-          messagesChangeHandler.bind(this)
-        );
-        //this.emit('messages:set', _messages);
-        this.emit('messages:changed');
-      },
-      enumerable: true
-    });
-    
-    function truncateInPlace(arr, maxLength, silent /* If true, subverts proxy to not fire change event */) {
-      maxLength = maxLength || _maxWindowLength;
-      silent = !!silent;
-      // Call the Array.prototype version, not the proxy in silent mode
-      var splice = silent ? Array.prototype.splice : arr.splice;
-      // splice, unlike, slice modifies in-place
-      splice.call(
-        arr,
-        maxLength, // start
-        arr.length - (Math.min(maxLength, arr.length) - 1) // number to delete
-      );
-      // Need to sort in the case where delivery is delayed. 
-      // Message timestamps will still reflect the original log time.
-      Array.prototype.sort.call(arr, function(a, b) {
-        var a = new Date(a.time);
-        var b = new Date(b.time);
-        // Reverse order
-        return b - a;
-      });
-      return arr;        
-    }
-    
-    Object.defineProperty(this, 'maxWindowLength', {
-      get: function() { return _state.maxWindowLength; },
-      set: function(value) {
-        if('number' !== typeof value || value < 1) { throw new TypeError('maxWindowLength must be a non-zero, positive number'); }
-        if(value < _maxWindowLength) {
-          truncateInPlace(this.messages, value);
-        }
-        _state.maxWindowLength = value;
-        this.emit('maxwindowlength:changed');
-      },
-      enumerable: true
-    });
-    
-    function messagesChangeHandler(e, args) {
-      console.log(e.type);
-      truncateInPlace(_messages, _maxWindowLength, true);
-      var messages = args;
-      switch(e.type) {
-        case 'push':
-        case 'unshift': // unshift allows passing multiple arguments
-          this.emit('messages:changed', Array.prototype.slice.call(arguments, 1));  // Arguments less the event
-          break;
-        case 'concat':
-        case 'join':
-        case 'slice': // None of these changes the array
-          break;
-        default:
-          this.emit('messages:changed');
-          break;
-      }
-      console.log(this.messages.length + ' total. Latest: ' + this.messages[0].message.time);
-    }
-    function facetsChangeHandler(e, args) { console.warn('FIXME: Calling facetsChangeHandler'); }
-    
-    Object.defineProperty(this, 'isListening', {
-      get: function() { return _state.isListening; },
-      set: function(value) {
-        this.emit('islistening:changed', _state.isListening = value);
-      },
-      enumerable: true
-    });
-    
-    
-    /*
-     * Set the internal state of the model from a thin JSON-like data structure, 
-     * likely coming from window.onpopstate. The inverse of LogApp.prototype.getState().
-     */
-    this.setState = function(state) {
-      if('undefined' === typeof state || null === state) { throw new TypeError(); }
-      function setProp(prop, index, array) {
-        _state[prop] = state[prop];
-      };
-      // Remember to update this whitelist
-      ['id', 'query', 'facets', 'maxWindowLength', 'isListening'].forEach(setProp, this);
-    };
-    /*
-     * Get the internal state of the model as a thin, JSON-like data structure.
-     * The inverse of LogApp.prototype.setState().
-     */
-    this.getState = function() {
-      var state = Object.create(null);
-      function getProp(prop, index, array) {
-        if(Array.isArray(this[prop])) {
-          _state[prop] = ArrayProxy.unproxy(this[prop]);
-        } else {
-          _state[prop] = this[prop];
-        }
-      }
-      // Remember to update this whitelist
-      ['id', 'query', 'facets', 'maxWindowLength', 'isListening'].forEach(getProp, this);
-      return state;
-    }
-  }
-  LogApp.prototype = Object.create(EventEmitter2.prototype);
-  
-  /****************************************/
-  function LogController(model) {
-    if(null === model || 'undefined' === typeof model) { throw new TypeError(); }
-    
-    this.model = model;
-    this.eventSource = null;
-    
-    function messageChangeHandler(/*msgs*/) {
-      renderMessages(this.model.messages, window.navigator.userLanguage || window.navigator.language);
-      var count = document.querySelector('footer .messages-count');
-      //console.log(this.model.messages.length + ' message' + (this.model.messages.length > 1 ? 's' : ''));
-      count.textContent = 'Showing ' 
-        + this.model.messages.length 
-        + ' message' 
-        + (this.model.messages.length > 1 ? 's' : '');
-    };
-   
-    model.on('messages:changed', messageChangeHandler.bind(this));
-
-    function queryChangeHandler(query) {
-      this.eventSource.close();
-      this.initializeStream();
-      
-      // TODO: Use URI utility
-      history.pushState(this.model.getState(), 
-        document.title, 
-        '/sse.html?q=' + encodeURIComponent(query)
-      );
-    }    
-    model.on('query:changed', queryChangeHandler.bind(this));
-  }
-  // FIXME: This is mixing concerns
-  LogController.prototype.initializeStream = function() {
-    var url = '/stream/' + this.model.id + 
-      (this.model.query ? '?q=' + encodeURIComponent(this.model.query) : '');
-    //console.log(url);
-    this.eventSource = new EventSource(url);
-    
-    var that = this;
-    var source = this.eventSource;
-    
-    source.addEventListener('log', function(e) {
-      var msg = JSON.parse(e.data);
-      that.model.messages.unshift(msg);
-    });
-
-    source.addEventListener('batch', function(e) {
-      var batch = JSON.parse(e.data);
-      that.model.messages = batch;
-    });
-
-    source.addEventListener('open', function(e) {
-      //console.dir(this);
-      console.log('Listening on ' + this.url);
-    });
-
-    source.onerror = function(e) {
-      console.dir(e);
-      this.close();
-    }
-  }
-  
-  /****************************************/
-  
   var model;
   var controller;
   
@@ -231,11 +23,11 @@
     var state = e.state;
     if(null === state) {
       // if(deep link) { parse URL } else { initialize from scratch }
-      model = new LogApp(); 
+      model = new LogsModel(); 
       window.model = model; // DEBUG
       console.log('New model with id ' + model.id);
       
-      controller = new LogController(model);
+      controller = new LogsController(model);
       controller.initializeStream();
     } else {
       // Set state (and fire a reset event)
@@ -244,63 +36,6 @@
     }
   }
   
-  // FIXME: Get a real UI framework to do the rendering. This is awful.
-  
-  function renderMessages(msgs, locale) {
-    var body = document.querySelector('table#Logs > tbody');
-    var table = body.parentNode;
-    table.removeChild(body);
-    body = document.createElement('tbody');
-    for(var i = 0; i < msgs.length; i++) {
-      var msg = msgs[i];
-      body.appendChild(renderRow(msg, msgs[i + 1]));
-    }
-    table.appendChild(body);
-    
-    function renderRow(msg, nextMsg, locale) {
-      var TIMESTAMP = 'HH:mm:ss, YYYY-MM-DD';
-      var row = document.createElement('tr');
-      var time = document.createElement('td'),
-          diff = document.createElement('td'),
-          sender = document.createElement('td'),
-          host = document.createElement('td'),
-          severity = document.createElement('td'),
-          message = document.createElement('td');
-      if(msg.severity) { severity.classList.add('severity', msg.severity.toLowerCase()); }
-      severity.appendChild(document.createTextNode(msg.severity));
-      severity.setAttribute('data-severity', msg.severity);
-      severity.setAttribute('title', msg.severity);
-      var currentTime = moment(msg.time);
-      var diffStr = '';
-      if(nextMsg && nextMsg.time) {
-        diffStr = moment.duration(
-          currentTime.diff(
-            moment(nextMsg.time)
-          )
-        ).asSeconds().toLocaleString(locale);
-      }
-      diff.appendChild(document.createTextNode(diffStr));
-      diff.classList.add('diff');
-      time.appendChild(document.createTextNode(currentTime.format(TIMESTAMP))); // .SSS for fractional seconds
-      time.setAttribute('data-time', currentTime.format());
-      time.classList.add('time');
-      sender.appendChild(document.createTextNode(msg.sender));
-      sender.classList.add('sender');
-      host.appendChild(document.createTextNode(msg.host));
-      host.classList.add('host');
-      message.appendChild(document.createTextNode(msg.message));
-      message.classList.add('message');
-      row.appendChild(severity);
-      row.appendChild(time);
-      row.appendChild(diff);
-      row.appendChild(sender);
-      row.appendChild(host);
-      row.appendChild(message);
-      // row.classList.add('flash'); // Since we're redrawing each time, no way to figure out the new ones
-      return row;
-    }
-  }
-
   document.addEventListener('DOMContentLoaded', function(e) {
     var form = document.querySelector('form#Search');
     form.addEventListener('submit', function(e) {
@@ -308,6 +43,7 @@
       model.query = form.querySelector('input').value;
     });
   }, false);
+  
 })();
   </script>
   <link type="text/css" rel="stylesheet" href="app.css"></link>
