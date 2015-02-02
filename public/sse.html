@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <title>Log Viewer</title>
   <script type="text/javascript" src="lib/number-tolocalestring.js"></script>
+  <script type="text/javascript" src="lib/URI.js"></script>
   <script type="text/javascript" src="EventEmitter2.js"></script>
   <script type="text/javascript" src="util.js"></script>
   <script type="text/javascript" src="array-proxy.js"></script>
@@ -13,24 +14,36 @@
   <script type="text/javascript">
 (function() {
   function LogApp() {
-  
-    var _id = util.guid();
-    var _messages = ArrayProxy.proxy([], messagesChangeHandler.bind(this));
-    var _maxWindowLength = 250;
-    var _query = '';
-    var _isListening = true;
+    var _state = {
+      'id': util.guid(),
+      'maxWindowLength': 250,
+      'query': '',
+      'facets': undefined, // ?
+      'isListening': true
+    }
+    // Transient state
+    var _messages = undefined; // Transient state populated later based on other state. //ArrayProxy.proxy([], messagesChangeHandler.bind(this));
     
     Object.defineProperty(this, 'id', {
-      value: _id,
+      value: _state.id,
       enumerable: true,
       writable: false
     });
     
     Object.defineProperty(this, 'query', {
-      get: function() { return _query; },
+      get: function() { return _state.query; },
       set: function(q) {
-        _query = q;
-        this.emit('query:changed');
+        this.emit('query:changed', _state.query = q);
+      },
+      enumerable: true
+    });
+    
+    Object.defineProperty(this, 'facets', {
+      get: function() { return _state.facets; },
+      set: function(value) {
+        if(!Array.isArray(value)) { throw new TypeError('Must be an Array'); }
+        _state.facets = value; // FIXME: ?
+        this.emit('facets:changed');
       },
       enumerable: true
     });
@@ -40,7 +53,7 @@
       set: function(ms) {
         if(!Array.isArray(ms)) { throw new TypeError('Must be an Array'); }
         _messages = ArrayProxy.proxy(
-          truncateInPlace(ms, _maxWindowLength),
+          truncateInPlace(ms, this.maxWindowLength),
           messagesChangeHandler.bind(this)
         );
         //this.emit('messages:set', _messages);
@@ -72,13 +85,13 @@
     }
     
     Object.defineProperty(this, 'maxWindowLength', {
-      get: function() { return _maxWindowLength; },
+      get: function() { return _state.maxWindowLength; },
       set: function(value) {
         if('number' !== typeof value || value < 1) { throw new TypeError('maxWindowLength must be a non-zero, positive number'); }
         if(value < _maxWindowLength) {
           truncateInPlace(this.messages, value);
         }
-        _maxWindowLength = value;
+        _state.maxWindowLength = value;
         this.emit('maxwindowlength:changed');
       },
       enumerable: true
@@ -103,15 +116,46 @@
       }
       console.log(this.messages.length + ' total. Latest: ' + this.messages[0].message.time);
     }
+    function facetsChangeHandler(e, args) { console.warn('FIXME: Calling facetsChangeHandler'); }
     
     Object.defineProperty(this, 'isListening', {
-      get: function() { return _isListening; },
+      get: function() { return _state.isListening; },
       set: function(value) {
-        _isListening = value;
-        this.emit('islistening:changed');
+        this.emit('islistening:changed', _state.isListening = value);
       },
       enumerable: true
     });
+    
+    
+    /*
+     * Set the internal state of the model from a thin JSON-like data structure, 
+     * likely coming from window.onpopstate. The inverse of LogApp.prototype.getState().
+     */
+    this.setState = function(state) {
+      if('undefined' === typeof state || null === state) { throw new TypeError(); }
+      function setProp(prop, index, array) {
+        _state[prop] = state[prop];
+      };
+      // Remember to update this whitelist
+      ['id', 'query', 'facets', 'maxWindowLength', 'isListening'].forEach(setProp, this);
+    };
+    /*
+     * Get the internal state of the model as a thin, JSON-like data structure.
+     * The inverse of LogApp.prototype.setState().
+     */
+    this.getState = function() {
+      var state = Object.create(null);
+      function getProp(prop, index, array) {
+        if(Array.isArray(this[prop])) {
+          _state[prop] = ArrayProxy.unproxy(this[prop]);
+        } else {
+          _state[prop] = this[prop];
+        }
+      }
+      // Remember to update this whitelist
+      ['id', 'query', 'facets', 'maxWindowLength', 'isListening'].forEach(getProp, this);
+      return state;
+    }
   }
   LogApp.prototype = Object.create(EventEmitter2.prototype);
   
@@ -137,6 +181,12 @@
     function queryChangeHandler(query) {
       this.eventSource.close();
       this.initializeStream();
+      
+      // TODO: Use URI utility
+      history.pushState(this.model.getState(), 
+        document.title, 
+        '/sse.html?q=' + encodeURIComponent(query)
+      );
     }    
     model.on('query:changed', queryChangeHandler.bind(this));
   }
@@ -172,11 +222,27 @@
   }
   
   /****************************************/
-  var model = new LogApp(); 
-  window.model = model; // DEBUG
-  console.log('New model with id ' + model.id);
   
-  var controller = new LogController(model);
+  var model;
+  var controller;
+  
+  // FIXME: This should be the event to initialize the model and hook it into the Controller.
+  window.onpopstate = function(e) {
+    var state = e.state;
+    if(null === state) {
+      // if(deep link) { parse URL } else { initialize from scratch }
+      model = new LogApp(); 
+      window.model = model; // DEBUG
+      console.log('New model with id ' + model.id);
+      
+      controller = new LogController(model);
+      controller.initializeStream();
+    } else {
+      // Set state (and fire a reset event)
+      console.warn('FIXME: Popstate is not null');
+      // model.setState(e.state); // Kinda, sorta
+    }
+  }
   
   // FIXME: Get a real UI framework to do the rendering. This is awful.
   
@@ -236,8 +302,6 @@
   }
 
   document.addEventListener('DOMContentLoaded', function(e) {
-    controller.initializeStream();
-    
     var form = document.querySelector('form#Search');
     form.addEventListener('submit', function(e) {
       e.preventDefault();

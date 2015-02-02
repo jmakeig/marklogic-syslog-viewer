@@ -1,3 +1,6 @@
+// FIXME: This should really be an extension of 
+//   Array.prototype rather than a monkey patch.
+//   Note: Array.isArray() doesn't work on extensions.
 var ArrayProxy = { // namespace
   // AOP pre-invocation advice. Returns a function.
   wrap: function(f, h, arr, that) {
@@ -17,7 +20,7 @@ var ArrayProxy = { // namespace
   // function. Returning false from the handler allows cancellation
   // of the proxied invocation. 
   proxy: function(arr, handler, that) {
-    if(!Array.isArray(arr)) throw new TypeError('Can\'t proxy something that isn\'t an Array.');
+    if(!Array.isArray(arr)) throw new TypeError('Can’t proxy something that isn’t an Array.');
     if('function' !== typeof handler) return arr;
     var Ap = Array.prototype;
     Object.getOwnPropertyNames(Ap).forEach(
@@ -40,5 +43,13 @@ var ArrayProxy = { // namespace
       }
     );
     return arr;
+  }, 
+  unproxy: function(arr) {
+    if(!Array.isArray(arr)) throw new TypeError('Can’t unproxy something that isn’t an Array.');
+    var copy = new Array(arr.length);
+    for(var i = 0; i < arr.length; i++) {
+      copy[i] = JSON.parse(JSON.stringify(arr[i])); // FIXME: Yikes! This is ugly (and slow).
+    }
+    return copy;
   }
 }
