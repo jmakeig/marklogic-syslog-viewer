@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>History state</title>
+  <script type="text/javascript" src="../public/lib/URI.js"></script>
+  <script type="text/javascript">
+
+var model = { count: 0 };
+
+document.addEventListener('DOMContentLoaded', function(e) {
+  var button = document.querySelector('#Push');
+  button.addEventListener('click', function(e) {
+    model.count = model.count + 1;
+    history.pushState(model, 'State: ' + model.count, '/pushstate.html?state=' + model.count);
+    document.querySelector('#Current').textContent = JSON.stringify(model);  
+  });
+});
+
+window.onpopstate = function(e) {
+  // console.dir(history.state);
+  if(null === e.state) { // No state 
+    var url = new URI(window.location);
+    var s = parseInt(url.search(true).state, 10);
+    // Either default or deep link without history
+    model = { count: s || 0 };
+  } else {
+    model = e.state;
+  }
+  document.querySelector('#Current').textContent = JSON.stringify(model);
+}
+  </script>
+</head>
+<body>
+  <button id="Push">Push</button>
+  <h2>Current State</h2>
+  <p id="Current"></p>
+</body>
+</html>
