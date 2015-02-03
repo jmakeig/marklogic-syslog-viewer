@@ -9,7 +9,7 @@ function LogsModel() {
     'isListening': true
   }
   // Transient state
-  var _messages = undefined; // Transient state populated later based on other state. //ArrayProxy.proxy([], messagesChangeHandler.bind(this));
+  var _messages = null; // Transient state populated later based on other state. //ArrayProxy.proxy([], messagesChangeHandler.bind(this));
   
   Object.defineProperty(this, 'id', {
     value: _state.id,
@@ -90,7 +90,7 @@ function LogsModel() {
   
   function messagesChangeHandler(e, args) {
     console.log(e.type);
-    truncateInPlace(_messages, _maxWindowLength, true);
+    truncateInPlace(_messages, this.maxWindowLength, true);
     var messages = args;
     switch(e.type) {
       case 'push':
@@ -119,10 +119,11 @@ function LogsModel() {
     enumerable: true
   });
   
-  
+  // Protected methods
   /*
    * Set the internal state of the model from a thin JSON-like data structure, 
    * likely coming from window.onpopstate. The inverse of LogsModel.getState().
+   * @protected
    */
   this.setState = function(state) {
     if('undefined' === typeof state || null === state) { throw new TypeError(); }
@@ -135,14 +136,15 @@ function LogsModel() {
   /*
    * Get the internal state of the model as a thin, JSON-like data structure.
    * The inverse of LogsModel.setState().
+   * @protected
    */
   this.getState = function() {
     var state = Object.create(null);
     function getProp(prop, index, array) {
       if(Array.isArray(this[prop])) {
-        _state[prop] = ArrayProxy.unproxy(this[prop]);
+        state[prop] = ArrayProxy.unproxy(this[prop]);
       } else {
-        _state[prop] = this[prop];
+        state[prop] = this[prop];
       }
     }
     // Remember to update this whitelist

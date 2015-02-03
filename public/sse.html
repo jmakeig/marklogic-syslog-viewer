@@ -12,6 +12,7 @@
   <!-- <script src="http://fb.me/JSXTransformer-0.12.2.js"></script> -->
   <script type="text/javascript" src="lib/moment.js"></script>
   <script type="text/javascript" src="LogsModel.js"></script>
+  <script type="text/javascript" src="LogsStore.js"></script>
   <script type="text/javascript" src="LogsController.js"></script>
   <script type="text/javascript">
 (function() {
@@ -28,7 +29,7 @@
       console.log('New model with id ' + model.id);
       
       controller = new LogsController(model);
-      controller.initializeStream();
+      controller.initialize();
     } else {
       // Set state (and fire a reset event)
       console.warn('FIXME: Popstate is not null');
