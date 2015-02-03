@@ -1,3 +1,4 @@
+var logger = require('./logger.js');
 var path = require('path');
 
 var express = require('express')
@@ -116,15 +117,15 @@ app.route('/stream/:appID') // ?q=query+string
       ]
     }).result(function(response) {
       //console.log(response);
-      console.log('created alert for session (%s) and app (%s) with query (%s)', sessionID, appID, query);
+      logger.info('created alert for session (%s) and app (%s) with query (%s)', sessionID, appID, query);
     }, function(error) {
-      console.log(JSON.stringify(error, null, 2));
+      logger.error(JSON.stringify(error, null, 2));
     });
 
     
     var buffer = buffers.get(sessionID, appID);
     //console.dir(Object.keys(buffers.buffers));
-    console.log('Subscribing to buffer %s', Buffers.key(sessionID, appID));
+    logger.info('Subscribing to buffer %s', Buffers.key(sessionID, appID));
     buffer.on('flush', function(msgs) {
       //console.log('Buffer session %s, app %s', this.session, this.app);
       if(sessionID === this.session && appID === this.app) {
@@ -166,7 +167,7 @@ app.post('/logs/:sessID/:appID', bodyParser.text({type: 'application/json'}), fu
   var sessionID = req.params['sessID'];
   var appID = req.params['appID'];
   if(buffers.has(sessionID, appID)) {
-    console.log('Received message for buffer %s', Buffers.key(sessionID, appID));
+    logger.info('Received message for buffer %s', Buffers.key(sessionID, appID));
     buffers.get(sessionID, appID).push(req.body);
     res.sendStatus(204);
     res.end();
@@ -181,6 +182,6 @@ app.post('/logs/:sessID/:appID', bodyParser.text({type: 'application/json'}), fu
 var server = app.listen(3000, function () {
   var host = server.address().address
   var port = server.address().port
-  console.log('Example app listening at http://%s:%s', host, port)
+  logger.info('Example app listening at http://%s:%s', host, port)
 })
 
