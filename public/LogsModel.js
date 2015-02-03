@@ -1,12 +1,13 @@
 // Depends on EventEmitter2
 
-function LogsModel() {
+function LogsModel(initialState) {
+  initialState = initialState || Object.create(null);
   var _state = {
     'id': util.guid(),
-    'maxWindowLength': 250,
-    'query': '',
-    'facets': undefined, // ?
-    'isListening': true
+    'maxWindowLength': initialState.maxWindowLength || 250,
+    'query': initialState.query || undefined,
+    'facets': initialState.facets || undefined, // ?
+    'isListening': initialState.maxWindowLength || true
   }
   // Transient state
   var _messages = null; // Transient state populated later based on other state. //ArrayProxy.proxy([], messagesChangeHandler.bind(this));
@@ -32,7 +33,7 @@ function LogsModel() {
     set: function(value) {
       if(!Array.isArray(value)) { throw new TypeError('Must be an Array'); }
       // TODO: Only update the value and fire the event if it's actually changed
-      _state.facets = value; // FIXME: ?
+      _state.facets = value;
       this.emit('facets:changed');
     },
     enumerable: true
@@ -118,20 +119,28 @@ function LogsModel() {
     },
     enumerable: true
   });
+
   
   // Protected methods
   /*
    * Set the internal state of the model from a thin JSON-like data structure, 
-   * likely coming from window.onpopstate. The inverse of LogsModel.getState().
+   * likely coming from window.onpopstate. Uses the setter properties and thus will
+   * fire property change events. The inverse of LogsModel.getState().
    * @protected
    */
   this.setState = function(state) {
     if('undefined' === typeof state || null === state) { throw new TypeError(); }
-    function setProp(prop, index, array) {
-      _state[prop] = state[prop];
-    };
     // Remember to update this whitelist
-    ['id', 'query', 'facets', 'maxWindowLength', 'isListening'].forEach(setProp, this);
+    var whitelist = [/*'id',*/ 'query', 'facets', 'maxWindowLength', 'isListening'];
+    //console.dir(state);
+    function setProp(prop, index, array) {
+      if(whitelist.indexOf(prop) > -1) {
+        this[prop] = state[prop];
+      } else {
+        console.warn('Trying to set property not on whitelist: ' + prop);
+      }
+    };
+    Object.getOwnPropertyNames(state).forEach(setProp, this);
   };
   /*
    * Get the internal state of the model as a thin, JSON-like data structure.
@@ -153,3 +162,10 @@ function LogsModel() {
   }
 }
 LogsModel.prototype = Object.create(EventEmitter2.prototype);
+// FIXME: Update to reflect real properties.
+LogsModel.prototype.equals = function(model) {
+  if(!model) return false;
+  return this.id === model.id 
+    && this.query === model.query 
+    && this.maxWindowLength === model.maxWindowLength;
+}

@@ -16,27 +16,30 @@
   <script type="text/javascript" src="LogsController.js"></script>
   <script type="text/javascript">
 (function() {
-  var model;
-  var controller;
+  var model = new LogsModel();
+  window.model = model; // DEBUG
+  console.log('New model with id ' + model.id);
+  var controller = new LogsController(model);
   
   // FIXME: This should be the event to initialize the model and hook it into the Controller.
   window.onpopstate = function(e) {
     var state = e.state;
+    var url = new URI(window.location);
     if(null === state) {
       // if(deep link) { parse URL } else { initialize from scratch }
-      model = new LogsModel(); 
-      window.model = model; // DEBUG
-      console.log('New model with id ' + model.id);
-      
-      controller = new LogsController(model);
-      controller.initialize();
+      var search = url.search(true);
+      model.setState(
+        {
+          'query': search.q || '',
+          'facets': search.f || [],
+        }
+      ); 
     } else {
-      // Set state (and fire a reset event)
-      console.warn('FIXME: Popstate is not null');
-      // model.setState(e.state); // Kinda, sorta
+      model.setState(e.state);
     }
   }
   
+  // FIXME: The Search component should issue a 'query' event
   document.addEventListener('DOMContentLoaded', function(e) {
     var form = document.querySelector('form#Search');
     form.addEventListener('submit', function(e) {

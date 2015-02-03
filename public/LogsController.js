@@ -19,12 +19,21 @@ function LogsController(model) {
 
   function queryChangeHandler(query) {
     this.store.query(query /* TODO: Facets */);
+
+    console.log('queryChangeHandler');
   
     // TODO: Use URI utility
-    history.pushState(this.model.getState(), 
-      document.title, 
-      '/sse.html?q=' + encodeURIComponent(query)
-    );
+    // FIXME: This mixes concerns, doesn't it?
+    // FIXME: This is really ugly checking differences.
+    if(!this.model.equals(history.state)) {
+      history.pushState(this.model.getState(), 
+        document.title + ': ' + query, 
+        '/sse.html?q=' + encodeURIComponent(query)
+      );
+    }
+    console.log('history.length = ' + history.length);
+    // FIXME: This needs to be part of the view
+    document.querySelector('input[name="q"]').value = query;
   }    
   model.on('query:changed', queryChangeHandler.bind(this));
   
