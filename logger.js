@@ -30,7 +30,7 @@ var syslog = new PosixSyslog();
 var log = new winston.Logger({
   levels: levels,
   level: 'debug',
-  transports: [syslog, new (winston.transports.Console)()]
+  transports: [syslog, new (winston.transports.Console)( {colorize: true} )]
 });
 
 // This looks to be the only way to effectively let the level threshold
