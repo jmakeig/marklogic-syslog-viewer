@@ -117,7 +117,7 @@ app.route('/stream/:appID') // ?q=query+string
       ]
     }).result(function(response) {
       //console.log(response);
-      logger.info('created alert for session (%s) and app (%s) with query (%s)', sessionID, appID, query);
+      logger.info('Created alert for session (%s) and app (%s) with query (%s)', sessionID, appID, query);
     }, function(error) {
       logger.error(JSON.stringify(error, null, 2));
     });
@@ -158,6 +158,14 @@ function writeEvent(event, stream) {
   // }
   stream.write('\n');
 }
+
+app.post('/logger', bodyParser.text({type: 'application/json'}), function(req, res) {
+  res.sendStatus(202);
+  res.end();
+  var msg = req.body;
+  // FIXME: How do I differentiate these from the application-level logs?
+  logger[msg.level](msg.body);
+});
 
 /**
  * Listen for individual messages sent from a MarkLogic trigger.
