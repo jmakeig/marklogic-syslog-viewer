@@ -106,7 +106,6 @@ function LogsModel(initialState) {
   });
   
   function messagesChangeHandler(e, args) {
-    console.log(e.type);
     truncateInPlace(_messages, this.maxWindowLength, true);
     var messages = args;
     switch(e.type) {
@@ -122,7 +121,8 @@ function LogsModel(initialState) {
         this.emit('messages:changed');
         break;
     }
-    console.log(this.messages.length + ' total. Latest: ' + this.messages[0].message.time);
+    console.log(this.messages.length + ' total. Latest: ' 
+      + this.messages[0].message + ' (' + this.messages[0].time + ')');
   }
   function facetsChangeHandler(e, args) { console.warn('FIXME: Calling facetsChangeHandler'); }
   
