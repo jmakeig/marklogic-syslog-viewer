@@ -5,25 +5,24 @@ function LogsController(model) {
 
   this.model = model;
   this.store = new LogsStore(model.id); // FIXME: This is too tightly coupled
-  this.isDOMReady = false;
+  this.views = {};
   
-  // Need to defer initializing views until the DOM is ready
-  document.addEventListener('DOMContentLoaded', (function(e) {
-    this.views = {
-      'facets': new FacetsView(document.querySelector('form#Facets')),
-      'search': null, // TODO
-      'messages': null, // TODO
-    };
-    
-    this.views.facets.on('constraints:change', (function(constraints) {
-      this.model.constraints = constraints;
-    }).bind(this));
-    
-    
-    this.isDOMReady = true;
-    //console.dir(document.querySelector('form#Facets'));
+  this.views = {
+    // Views are in charge of defering binding to elements
+    'facets': new FacetsView('form#Facets'),
+    'search': new QueryView('form#Search'),
+    'messages': null, // TODO
+  };
+  
+  this.views.facets.on('constraints:change', (function(constraints) {
+    this.model.constraints = constraints;
   }).bind(this));
   
+  this.views.search.on('query:change', (function(query) {
+    this.model.query = query;
+  }).bind(this));
+  this.views.search.on('query:submit', queryChangeHandler.bind(this));
+    
   function messageChangeHandler(/*msgs*/) {
     renderMessages(this.model.messages);
     var count = document.querySelector('footer .messages-count');
@@ -39,13 +38,12 @@ function LogsController(model) {
     this.views.facets.render(
       this.model.facets, this.model.constraints, this.model.locale
     );
-    //renderFacets(this.model.facets, this.model.constraints, this.model.locale);
   }
   model.on('facets:changed', facetsChangeHandler.bind(this));
   
   function queryChangeHandler(query) {
-    this.store.query(query /* TODO: Facets */);
-    this.store.facets(query);
+    this.store.query(this.model.query /* TODO: Facets */);
+    this.store.facets(this.model.query);
 
     // TODO: Use URI utility
     // FIXME: This mixes concerns, doesn't it?
@@ -56,11 +54,10 @@ function LogsController(model) {
         '/sse.html?q=' + encodeURIComponent(query)
       );
     }
-    // console.log('history.length = ' + history.length);
-    // FIXME: This needs to be part of the view
-    document.querySelector('input[name="q"]').value = query;
-  }    
-  model.on('query:changed', queryChangeHandler.bind(this));
+  }
+  model.on('query:changed', (function(query) {
+    this.views.search.render(query);
+  }).bind(this));
   
   function constraintsChangeHandler(constraints) {
     this.store.query(this.model.query /* TODO: Facets */);
@@ -83,21 +80,11 @@ function LogsController(model) {
   
   
 }
-/*
-LogsController.prototype.initialize = function() {
-  console.log('initialize');
-  this.store.query(this.model.query);
-  this.store.facets(this.model.query);
-}
-*/
-
-
 
 /********** View logic **********/
-// FIXME: A real framework would handle this.
-
-
 // FIXME: Get a real UI framework to do the rendering. This is awful.
+
+// FIXME: Convert this over to the view component architecture below.
 function renderMessages(msgs, locale) {
   var body = document.querySelector('table#Logs > tbody');
   var table = body.parentNode;
@@ -154,22 +141,56 @@ function renderMessages(msgs, locale) {
   }
 }
 
-function FacetsView(el) {
-  this.element = el || document.createElement('form');
+function QueryView(selector) {
+  this.element = null;
+  
+  document.addEventListener('DOMContentLoaded', (function(e) {
+    this.element = elementFromSelector(selector, document.createElement('form'));
+    this.element.addEventListener('submit', (function(e) {
+      e.preventDefault();
+      //model.query = form.querySelector('input').value;
+      this.emit('query:submit', this.query);
+    }).bind(this));
+    this.element.addEventListener('input', (function(e) {
+      this.emit('query:change', this.query);
+    }).bind(this), false);
+  }).bind(this), false);
+}
+QueryView.prototype = new EventEmitter2;
+QueryView.prototype.render = function(query) {
+  this.element.querySelector('input[name="q"]').value = query;
+}
+Object.defineProperty(QueryView.prototype, 'query', {
+  get: function() { return this.element.querySelector('input[name="q"]').value; },
+  enumerable: true
+});
+
+function elementFromSelector(selector, fallback, parent) {
+  parent = parent || document;
+  if(selector instanceof HTMLElement) { return selector; }
+  if('string' === typeof selector) { return parent.querySelector(selector); }
+  return fallback || document.createElement('div');
+}
+
+/*
+function deferDOM(f, that) {
+  document.addEventListener('DOMContentLoaded', f.bind(that || null));
+}
+*/
+
+function FacetsView(selector) {
+  this.element = null;
+  
+  // Defer attaching events until DOM is loaded
+  document.addEventListener('DOMContentLoaded', (function(e) {
+    this.element = elementFromSelector(selector, document.createElement('form'));
+    this.element.addEventListener('change', handleChange.bind(this), false);
+  }).bind(this));
 
   function handleChange(e) {
-    var boxes = Array.prototype.slice.call(this.element.querySelectorAll('input[type=checkbox]'));
-    var constraints = Object.create(null);
-    boxes.forEach(function(box) {
-      if(box.checked) {
-        if('undefined' === typeof constraints[box.name]) { constraints[box.name] = []; }
-        constraints[box.name].push(box.value);
-      }
-    });
-    //console.dir(constraints);
-    this.emit('constraints:change', constraints)
-  }
-  this.element.addEventListener('change', handleChange.bind(this), false);
+    console.dir(this.constraints);
+    this.emit('constraints:change', this.constraints);
+  }  
 }
 FacetsView.prototype = new EventEmitter2;
 FacetsView.prototype.render = function(facets, constraints, locale) {
@@ -212,3 +233,24 @@ FacetsView.prototype.render = function(facets, constraints, locale) {
     form.appendChild(container);
   });
 }
+Object.defineProperty(FacetsView.prototype, 'constraints', {
+  get: function() { 
+    var boxes = Array.prototype.slice.call(this.element.querySelectorAll('input[type=checkbox]'));
+    var constraints = Object.create(null);
+    boxes.forEach(function(box) {
+      if(box.checked) {
+        if('undefined' === typeof constraints[box.name]) { constraints[box.name] = []; }
+        constraints[box.name].push(box.value);
+      }
+    });
+    return constraints;
+  },
+  set: function(constraints) {
+    var boxes = Array.prototype.slice.call(this.element.querySelectorAll('input[type=checkbox]'));
+    boxes.forEach(function(box) {
+      box.checked = constraints[box.name] && constraints[box.name].indexOf(box.value) >= 0;
+    });
+  },
+  
+  enumerable: true
+});

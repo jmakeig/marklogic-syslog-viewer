@@ -42,16 +42,6 @@
       model.setState(e.state);
     }
   }
-  
-  // FIXME: The Search component should issue a 'query' event
-  document.addEventListener('DOMContentLoaded', function(e) {
-    var form = document.querySelector('form#Search');
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-      model.query = form.querySelector('input').value;
-    });
-  }, false);
-  
 })();
   </script>
   <link type="text/css" rel="stylesheet" href="app.css"></link>
