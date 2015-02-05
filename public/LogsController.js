@@ -35,6 +35,7 @@ function LogsController(model) {
   model.on('messages:changed', messageChangeHandler.bind(this));
   
   function facetsChangeHandler(facets) {
+    //console.dir(model.getState());
     this.views.facets.render(
       this.model.facets, this.model.constraints, this.model.locale
     );
@@ -61,7 +62,7 @@ function LogsController(model) {
   
   function constraintsChangeHandler(constraints) {
     this.store.query(this.model.query /* TODO: Facets */);
-    this.store.facets(this.model.query);
+    this.store.facets(this.model.query, this.model.constraints);
   }
   model.on('constraints:changed', constraintsChangeHandler.bind(this));
   
@@ -181,16 +182,17 @@ function deferDOM(f, that) {
 function FacetsView(selector) {
   this.element = null;
   
+  function handleChange(e) {
+    this.emit('constraints:change', this.constraints);
+  }
+  
   // Defer attaching events until DOM is loaded
   document.addEventListener('DOMContentLoaded', (function(e) {
     this.element = elementFromSelector(selector, document.createElement('form'));
     this.element.addEventListener('change', handleChange.bind(this), false);
   }).bind(this));
 
-  function handleChange(e) {
-    console.dir(this.constraints);
-    this.emit('constraints:change', this.constraints);
-  }  
+  
 }
 FacetsView.prototype = new EventEmitter2;
 FacetsView.prototype.render = function(facets, constraints, locale) {
@@ -213,12 +215,31 @@ FacetsView.prototype.render = function(facets, constraints, locale) {
   var list, header;
   Object.getOwnPropertyNames(facets).forEach(function(f) {
     list = document.createElement('ol');
+    // Custom sort for severity
+    if('severity' === f) {
+      facets[f].facetValues.sort(function(a, b) {
+        var levels = {
+          'emergency': 7, 
+          'alert':     6,
+          'critical':  5,
+          'error':     4,
+          'warning':   3,
+          'notice':    2,
+          'info':      1,
+          'debug':     0
+        };
+        return levels[b.value] - levels[a.value];
+      });
+    }
     facets[f].facetValues.forEach(function(fv) {
       var item = document.createElement('li');
       var checkbox = document.createElement('input');
         checkbox.setAttribute('type', 'checkbox');
         checkbox.setAttribute('name', f);
         checkbox.setAttribute('value', fv.name);
+        if(constraints[f] && constraints[f].indexOf(fv.name) >= 0) {
+          checkbox.setAttribute('checked', 'checked');
+        }
       item.appendChild(checkbox);
       item.appendChild(document.createTextNode(' ' + fv.name + ' (' + fv.count + ')'));
       list.appendChild(item);

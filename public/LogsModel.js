@@ -38,8 +38,11 @@ function LogsModel(initialState) {
   Object.defineProperty(this, 'constraints', {
     get: function() { return _state['constraints']; },
     set: function(value) {
-      _state['constraints'] = value;
-      this.emit('constraints:changed', value);
+      if(!Object.equals(_state['constraints'], value)) {
+        //console.debug('changed constraints to ' + JSON.stringify(value));
+        _state['constraints'] = value;
+        this.emit('constraints:changed', value);
+      }
     },
     enumerable: true
   });
