@@ -1,13 +1,18 @@
 // Depends on EventEmitter2
 
+/*
+ * @param initialState Sparse map
+ * @constructor
+ */
 function LogsModel(initialState) {
   initialState = initialState || Object.create(null);
   var _state = {
     'id': util.guid(),
     'maxWindowLength': initialState.maxWindowLength || 250,
-    'query': initialState.query || undefined,
-    'facets': initialState.facets || undefined, // ?
-    'isListening': initialState.maxWindowLength || true
+    'query': initialState.query                     || undefined,
+    'constraints': initialState.constraints         || undefined,
+    'isListening': initialState.maxWindowLength     || true,
+    'locale': initialState.locale                   || 'en-us'
   }
   // Transient state
   var _messages = null; // Transient state populated later based on other state. //ArrayProxy.proxy([], messagesChangeHandler.bind(this));

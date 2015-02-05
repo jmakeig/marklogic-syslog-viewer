@@ -7,7 +7,6 @@ function LogsController(model) {
   this.store = new LogsStore(model.id); // FIXME: This is too tightly coupled
     
   function messageChangeHandler(/*msgs*/) {
-    renderMessages(this.model.messages, window.navigator.userLanguage || window.navigator.language);
     var count = document.querySelector('footer .messages-count');
     //console.log(this.model.messages.length + ' message' + (this.model.messages.length > 1 ? 's' : ''));
     count.textContent = 'Showing ' 

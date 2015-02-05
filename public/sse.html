@@ -16,8 +16,12 @@
   <script type="text/javascript" src="LogsController.js"></script>
   <script type="text/javascript">
 (function() {
-  var model = new LogsModel();
-  window.model = model; // DEBUG
+  var model = new LogsModel(
+    {
+      locale: (window.navigator.userLanguage || window.navigator.language)
+    }
+  );
+  window.model = model; // DEBUG ONLY
   console.log('New model with id ' + model.id);
   var controller = new LogsController(model);
   
