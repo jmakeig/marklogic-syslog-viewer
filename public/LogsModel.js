@@ -15,7 +15,8 @@ function LogsModel(initialState) {
     'locale': initialState.locale                   || 'en-us'
   }
   // Transient state
-  var _messages = null; // Transient state populated later based on other state. //ArrayProxy.proxy([], messagesChangeHandler.bind(this));
+  var _messages = null; //ArrayProxy.proxy([], messagesChangeHandler.bind(this));
+  var _facets = null;
   
   Object.defineProperty(this, 'id', {
     value: _state.id,
@@ -33,16 +34,17 @@ function LogsModel(initialState) {
     enumerable: true
   });
   
-  Object.defineProperty(this, 'facets', {
-    get: function() { return _state.facets; },
-    set: function(value) {
-      if(!Array.isArray(value)) { throw new TypeError('Must be an Array'); }
-      // TODO: Only update the value and fire the event if it's actually changed
-      _state.facets = value;
-      this.emit('facets:changed');
-    },
-    enumerable: true
-  });
+  // TODO: Implement me!
+  // Object.defineProperty(this, 'constraints', {
+//     get: function() { return _state['constraints']; },
+//     set: function(value) {
+//       if(!Array.isArray(value)) { throw new TypeError('Must be an Array'); }
+//       // TODO: Only update the value and fire the event if it's actually changed
+//       _state['constraints'] = value;
+//       this.emit('constraints:changed', value);
+//     },
+//     enumerable: true
+//   });
   
   Object.defineProperty(this, 'messages', {
     get: function() { return _messages; },
@@ -52,7 +54,18 @@ function LogsModel(initialState) {
         truncateInPlace(ms, this.maxWindowLength),
         messagesChangeHandler.bind(this)
       );
-      this.emit('messages:changed');
+      this.emit('messages:changed', _messages);
+    },
+    enumerable: true
+  });
+  
+  Object.defineProperty(this, 'facets', {
+    get: function() { return _facets; },
+    set: function(value) {
+      if(!Object.equals(_facets, value)) {
+        _facets = value;
+        this.emit('facets:changed', _facets);
+      }
     },
     enumerable: true
   });
@@ -136,7 +149,7 @@ function LogsModel(initialState) {
   this.setState = function(state) {
     if('undefined' === typeof state || null === state) { throw new TypeError(); }
     // Remember to update this whitelist
-    var whitelist = [/*'id',*/ 'query', 'facets', 'maxWindowLength', 'isListening'];
+    var whitelist = [/*'id',*/ 'query', 'constraints', 'maxWindowLength', 'isListening'];
     //console.dir(state);
     function setProp(prop, index, array) {
       if(whitelist.indexOf(prop) > -1) {
@@ -162,7 +175,7 @@ function LogsModel(initialState) {
       }
     }
     // Remember to update this whitelist
-    ['id', 'query', 'facets', 'maxWindowLength', 'isListening'].forEach(getProp, this);
+    ['id', 'query', 'constraints', 'maxWindowLength', 'isListening'].forEach(getProp, this);
     return state;
   }
 }

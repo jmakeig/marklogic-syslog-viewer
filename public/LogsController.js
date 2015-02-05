@@ -7,6 +7,7 @@ function LogsController(model) {
   this.store = new LogsStore(model.id); // FIXME: This is too tightly coupled
     
   function messageChangeHandler(/*msgs*/) {
+    renderMessages(this.model.messages);
     var count = document.querySelector('footer .messages-count');
     //console.log(this.model.messages.length + ' message' + (this.model.messages.length > 1 ? 's' : ''));
     count.textContent = 'Showing ' 
@@ -15,12 +16,16 @@ function LogsController(model) {
       + (this.model.messages.length > 1 ? 's' : '');
   };
   model.on('messages:changed', messageChangeHandler.bind(this));
-
+  
+  function facetsChangeHandler(facets) {
+    renderFacets(this.model.facets, this.model.constraints, this.model.locale);
+  }
+  model.on('facets:changed', facetsChangeHandler.bind(this));
+  
   function queryChangeHandler(query) {
     this.store.query(query /* TODO: Facets */);
+    this.store.facets(query);
 
-    console.log('queryChangeHandler');
-  
     // TODO: Use URI utility
     // FIXME: This mixes concerns, doesn't it?
     // FIXME: This is really ugly checking differences.
@@ -30,11 +35,16 @@ function LogsController(model) {
         '/sse.html?q=' + encodeURIComponent(query)
       );
     }
-    console.log('history.length = ' + history.length);
+    // console.log('history.length = ' + history.length);
     // FIXME: This needs to be part of the view
     document.querySelector('input[name="q"]').value = query;
   }    
   model.on('query:changed', queryChangeHandler.bind(this));
+  
+  function constraintsChangeHandler(constraints) {
+  
+  }
+  model.on('constraints:changed', constraintsChangeHandler.bind(this));
   
   // Store  
   this.store.on('trickle', function(msg) {
@@ -45,11 +55,19 @@ function LogsController(model) {
     model.messages = msgs;
   });
   
+  this.store.on('facets', function(facets, query, constraints) {
+    model.facets = facets;
+  });
+  
   
 }
+/*
 LogsController.prototype.initialize = function() {
+  console.log('initialize');
   this.store.query(this.model.query);
+  this.store.facets(this.model.query);
 }
+*/
 
 
 
@@ -93,6 +111,7 @@ function renderMessages(msgs, locale) {
     }
     diff.appendChild(document.createTextNode(diffStr));
     diff.classList.add('diff');
+    // TODO: Use <time>, and maybe something like https://github.com/github/time-elements
     time.appendChild(document.createTextNode(currentTime.format(TIMESTAMP))); // .SSS for fractional seconds
     time.setAttribute('data-time', currentTime.format());
     time.classList.add('time');
@@ -111,4 +130,36 @@ function renderMessages(msgs, locale) {
     // row.classList.add('flash'); // Since we're redrawing each time, no way to figure out the new ones
     return row;
   }
+}
+
+function renderFacets(facets, constraints, locale) {
+  var form = document.querySelector('form#Facets');
+/*
+  <div class="facet hosts">
+    <h3>Hosts</h3>
+    <ol>
+      <li><input type="checkbox"/> ex1.example.com (15,839)</li>
+      <li><input type="checkbox"/> qa.some-other.com (4,402)</li>
+      <li><input type="checkbox"/> ex2.example.com (189)</li>
+      <li><input type="checkbox"/> ex3.example.com (5)</li>
+      <li><input type="checkbox"/> ex4.example.com (0)</li>
+    </ol>
+  </div>  
+*/
+  console.dir(facets);
+  Object.getOwnPropertyNames(facets).forEach(function(f) {
+    var list = document.createElement('ol');
+    facets[f].facetValues.forEach(function(fv) {
+      var item = document.createElement('li');
+      var checkbox = document.createElement('input');
+        checkbox.setAttribute('type', 'checkbox');
+      item.appendChild(checkbox);
+      item.appendChild(document.createTextNode(' ' + fv.name + ' (' + fv.count + ')'));
+      list.appendChild(item);
+    });
+    var container = document.createElement('div');  
+      container.classList.add('facet', f);
+    container.appendChild(list);
+    form.appendChild(container);
+  });
 }

@@ -35,7 +35,7 @@
       model.setState(
         {
           'query': search.q || '',
-          'facets': search.f || [],
+          'constraints': search.f || [],
         }
       ); 
     } else {
@@ -66,7 +66,7 @@
       <div class="control submit"><button>Search</button></div>
     </form>
     <form id="Facets">
-      <div class="facet hosts">
+      <!--<div class="facet hosts">
         <h3>Hosts</h3>
         <ol>
           <li><input type="checkbox"/> ex1.example.com (15,839)</li>
@@ -93,7 +93,7 @@
           <li><input type="checkbox"/> Info</li>
           <li><input type="checkbox"/> Debug</li>
         </ol>
-      </div>
+      </div>-->
       <!--<div class="facet date-range">
       
       </div>-->
