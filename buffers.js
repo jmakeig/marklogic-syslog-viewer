@@ -4,8 +4,14 @@
 var Buffers = function(delay, length) {
   this.delay = delay || 1000;
   this.length = length || 25;
-  this.buffers = {};
+  this.buffers = Object.create(null);
 }
+
+Object.defineProperty(Buffers.prototype, 'count', {
+  get: function() { return Object.keys(this.buffers).length; },
+  enumerable: true
+});
+
 /**
  * Get or create a TimedBuffer for the given session and app.
  * @param sessionID string
