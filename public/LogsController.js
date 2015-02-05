@@ -134,21 +134,22 @@ function renderMessages(msgs, locale) {
 
 function renderFacets(facets, constraints, locale) {
   var form = document.querySelector('form#Facets');
-/*
-  <div class="facet hosts">
-    <h3>Hosts</h3>
-    <ol>
-      <li><input type="checkbox"/> ex1.example.com (15,839)</li>
-      <li><input type="checkbox"/> qa.some-other.com (4,402)</li>
-      <li><input type="checkbox"/> ex2.example.com (189)</li>
-      <li><input type="checkbox"/> ex3.example.com (5)</li>
-      <li><input type="checkbox"/> ex4.example.com (0)</li>
-    </ol>
-  </div>  
-*/
-  console.dir(facets);
+  /*
+    <div class="facet hosts">
+      <h3>Hosts</h3>
+      <ol>
+        <li><input type="checkbox"/> ex1.example.com (15,839)</li>
+        <li><input type="checkbox"/> qa.some-other.com (4,402)</li>
+        <li><input type="checkbox"/> ex2.example.com (189)</li>
+        <li><input type="checkbox"/> ex3.example.com (5)</li>
+        <li><input type="checkbox"/> ex4.example.com (0)</li>
+      </ol>
+    </div>  
+  */
+  // console.dir(facets);
+  var list, header;
   Object.getOwnPropertyNames(facets).forEach(function(f) {
-    var list = document.createElement('ol');
+    list = document.createElement('ol');
     facets[f].facetValues.forEach(function(fv) {
       var item = document.createElement('li');
       var checkbox = document.createElement('input');
@@ -156,9 +157,13 @@ function renderFacets(facets, constraints, locale) {
       item.appendChild(checkbox);
       item.appendChild(document.createTextNode(' ' + fv.name + ' (' + fv.count + ')'));
       list.appendChild(item);
+      header = document.createElement('h3');
+      header.textContent = f;
     });
+    
     var container = document.createElement('div');  
       container.classList.add('facet', f);
+    container.appendChild(header);
     container.appendChild(list);
     form.appendChild(container);
   });

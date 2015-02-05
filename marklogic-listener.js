@@ -168,6 +168,37 @@ function writeEvent(event, stream) {
   stream.write('\n');
 }
 
+app.route('/facets') // ?q=query+string
+  .get(function(req, res) {
+    //console.log('Last-Event-ID: %s', req.get('Last-Event-ID'));
+    //console.log(req.sessionID);
+    var sessionID = req.sessionID;
+    var appID = req.params['appID'];
+    var query = req.query['q'] || null;
+    
+    db.documents.query(
+      // TODO: Incorporate query
+      qb.where(qb.collection('logs'))
+      .calculate(
+        qb.facet('sender'),
+        qb.facet('host'),
+        qb.facet('severity')
+      )
+      //.withOptions({view: 'facets'})
+      .slice(0)
+    )
+    .result(function(response) {
+      res
+        .status(200)
+        .json(response[0].facets);
+    }, function(error) {
+      logger.error(error);
+    });
+  });
+
+/*
+ * Set-and-forget logging endpoint from the browser.
+ */
 app.post('/logger', bodyParser.text({type: 'application/json'}), function(req, res) {
   res.sendStatus(202);
   res.end();

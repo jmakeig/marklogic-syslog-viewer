@@ -47,79 +47,16 @@ LogsStore.prototype.query = function(query, constraints) {
   }
 };
 LogsStore.prototype.facets = function(query, constraints) {
-  var dummy = {
-  "sender": {
-    "type": "xs:string",
-    "facetValues": [
-      {
-        "name": "MarkLogic",
-        "count": 452,
-        "value": "MarkLogic"
-      },
-      {
-        "name": "node",
-        "count": 254,
-        "value": "node"
-      }
-    ]
-  },
-  "host": {
-    "type": "xs:string",
-    "facetValues": [
-      {
-        "name": "MacPro-2600",
-        "count": 706,
-        "value": "MacPro-2600"
-      }
-    ]
-  },
-  "severity": {
-    "type": "xs:string",
-    "facetValues": [
-      {
-        "name": "alert",
-        "count": 24,
-        "value": "alert"
-      },
-      {
-        "name": "critical",
-        "count": 27,
-        "value": "critical"
-      },
-      {
-        "name": "debug",
-        "count": 44,
-        "value": "debug"
-      },
-      {
-        "name": "emergency",
-        "count": 1,
-        "value": "emergency"
-      },
-      {
-        "name": "error",
-        "count": 38,
-        "value": "error"
-      },
-      {
-        "name": "info",
-        "count": 94,
-        "value": "info"
-      },
-      {
-        "name": "notice",
-        "count": 40,
-        "value": "notice"
-      },
-      {
-        "name": "warning",
-        "count": 438,
-        "value": "warning"
-      }
-    ]
+  var that = this;
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+    if(XMLHttpRequest.DONE === this.readyState) {
+      var facets = JSON.parse(this.responseText);
+      that.emit('facets', facets, query, constraints);
+    }
   }
-};
-  this.emit('facets', dummy, query, constraints);
+  xhr.open('GET', '/facets', true);
+  xhr.send(null);
 }
 
 
