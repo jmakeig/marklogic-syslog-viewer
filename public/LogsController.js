@@ -134,6 +134,7 @@ function renderMessages(msgs, locale) {
 
 function renderFacets(facets, constraints, locale) {
   var form = document.querySelector('form#Facets');
+  while(form.lastChild) { form.removeChild(form.lastChild); }
   /*
     <div class="facet hosts">
       <h3>Hosts</h3>
