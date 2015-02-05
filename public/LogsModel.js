@@ -35,16 +35,14 @@ function LogsModel(initialState) {
   });
   
   // TODO: Implement me!
-  // Object.defineProperty(this, 'constraints', {
-//     get: function() { return _state['constraints']; },
-//     set: function(value) {
-//       if(!Array.isArray(value)) { throw new TypeError('Must be an Array'); }
-//       // TODO: Only update the value and fire the event if it's actually changed
-//       _state['constraints'] = value;
-//       this.emit('constraints:changed', value);
-//     },
-//     enumerable: true
-//   });
+  Object.defineProperty(this, 'constraints', {
+    get: function() { return _state['constraints']; },
+    set: function(value) {
+      _state['constraints'] = value;
+      this.emit('constraints:changed', value);
+    },
+    enumerable: true
+  });
   
   Object.defineProperty(this, 'messages', {
     get: function() { return _messages; },

@@ -5,7 +5,25 @@ function LogsController(model) {
 
   this.model = model;
   this.store = new LogsStore(model.id); // FIXME: This is too tightly coupled
+  this.isDOMReady = false;
+  
+  // Need to defer initializing views until the DOM is ready
+  document.addEventListener('DOMContentLoaded', (function(e) {
+    this.views = {
+      'facets': new FacetsView(document.querySelector('form#Facets')),
+      'search': null, // TODO
+      'messages': null, // TODO
+    };
     
+    this.views.facets.on('constraints:change', (function(constraints) {
+      this.model.constraints = constraints;
+    }).bind(this));
+    
+    
+    this.isDOMReady = true;
+    //console.dir(document.querySelector('form#Facets'));
+  }).bind(this));
+  
   function messageChangeHandler(/*msgs*/) {
     renderMessages(this.model.messages);
     var count = document.querySelector('footer .messages-count');
@@ -18,7 +36,10 @@ function LogsController(model) {
   model.on('messages:changed', messageChangeHandler.bind(this));
   
   function facetsChangeHandler(facets) {
-    renderFacets(this.model.facets, this.model.constraints, this.model.locale);
+    this.views.facets.render(
+      this.model.facets, this.model.constraints, this.model.locale
+    );
+    //renderFacets(this.model.facets, this.model.constraints, this.model.locale);
   }
   model.on('facets:changed', facetsChangeHandler.bind(this));
   
@@ -42,7 +63,8 @@ function LogsController(model) {
   model.on('query:changed', queryChangeHandler.bind(this));
   
   function constraintsChangeHandler(constraints) {
-  
+    this.store.query(this.model.query /* TODO: Facets */);
+    this.store.facets(this.model.query);
   }
   model.on('constraints:changed', constraintsChangeHandler.bind(this));
   
@@ -132,8 +154,27 @@ function renderMessages(msgs, locale) {
   }
 }
 
-function renderFacets(facets, constraints, locale) {
-  var form = document.querySelector('form#Facets');
+function FacetsView(el) {
+  this.element = el || document.createElement('form');
+
+  function handleChange(e) {
+    var boxes = Array.prototype.slice.call(this.element.querySelectorAll('input[type=checkbox]'));
+    var constraints = Object.create(null);
+    boxes.forEach(function(box) {
+      if(box.checked) {
+        if('undefined' === typeof constraints[box.name]) { constraints[box.name] = []; }
+        constraints[box.name].push(box.value);
+      }
+    });
+    //console.dir(constraints);
+    this.emit('constraints:change', constraints)
+  }
+  this.element.addEventListener('change', handleChange.bind(this), false);
+}
+FacetsView.prototype = new EventEmitter2;
+FacetsView.prototype.render = function(facets, constraints, locale) {
+  //var form = document.querySelector('form#Facets');
+  form = this.element;
   while(form.lastChild) { form.removeChild(form.lastChild); }
   /*
     <div class="facet hosts">
@@ -155,6 +196,8 @@ function renderFacets(facets, constraints, locale) {
       var item = document.createElement('li');
       var checkbox = document.createElement('input');
         checkbox.setAttribute('type', 'checkbox');
+        checkbox.setAttribute('name', f);
+        checkbox.setAttribute('value', fv.name);
       item.appendChild(checkbox);
       item.appendChild(document.createTextNode(' ' + fv.name + ' (' + fv.count + ')'));
       list.appendChild(item);
