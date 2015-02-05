@@ -122,10 +122,16 @@ app.route('/stream/:appID') // ?q=query+string
       logger.error(JSON.stringify(error, null, 2));
     });
 
-    
+    // logger.debug('Total buffers: ' + buffers.count);
     var buffer = buffers.get(sessionID, appID);
+    // FIXME: I don’t understand why I have to clear the flush listeners and can’t reuse,
+    //        as below wit the if statement.
+    buffer.removeAllListeners('flush');
     //console.dir(Object.keys(buffers.buffers));
     logger.info('Subscribing to buffer %s', Buffers.key(sessionID, appID));
+    // logger.debug('Buffer has %d listeners to \'flush\'', 
+    //   require('events').EventEmitter.listenerCount(buffer, 'flush'));
+    //if(0 === require('events').EventEmitter.listenerCount(buffer, 'flush')) {
     buffer.on('flush', function(msgs) {
       //console.log('Buffer session %s, app %s', this.session, this.app);
       if(sessionID === this.session && appID === this.app) {
@@ -142,6 +148,9 @@ app.route('/stream/:appID') // ?q=query+string
         });
       }
     });
+    // } else {
+    //   logger.debug('Buffer has %d \'flush\' listeners', require('events').EventEmitter.listenerCount(buffer, 'flush'));
+    // }
   });
 
 /**
