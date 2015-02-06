@@ -30,7 +30,6 @@
     var state = e.state;
     var url = new URI(window.location);
     if(null === state) {
-      // if(deep link) { parse URL } else { initialize from scratch }
       var search = url.search(true);
       model.setState(
         {
