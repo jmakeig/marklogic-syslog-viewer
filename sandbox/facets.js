@@ -3,18 +3,47 @@ var conn = require('../marklogic-config.js').connection;
 var db = marklogic.createDatabaseClient(conn);
 var qb = marklogic.queryBuilder;
 
+var queryString = '';
+
+var constraints = {
+  "sender": ["MarkLogic"],
+  "severity": ["error", "warning"]
+}
+
+var where = [
+  qb.parsedFrom(queryString ,
+    qb.parseBindings( 
+      qb.word('host', qb.bind('h')),
+      qb.value('severity', qb.bind('l')),
+      qb.word('sender', qb.bind('s'))
+    )
+  ),
+  qb.collection('logs')
+];
+
+for(var c in constraints) {
+  where.push(
+    qb.or(
+      constraints[c].map(function(val) {
+        return qb.value(c, val);
+      })
+    )
+  );
+}
+
+//console.log('%j', where);
+
 db.documents.query(
-  qb.where(qb.collection('logs'))
+  qb.where(where)
   .calculate(
     qb.facet('sender'),
     qb.facet('host'),
     qb.facet('severity')
   )
-  //.withOptions({view: 'facets'})
   .slice(0)
 )
 .result(function(response) {
-  console.log(JSON.stringify(response[0].facets, null, 2));
+  console.log(JSON.stringify(response, null, 2));
 });
 
 /*
