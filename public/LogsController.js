@@ -42,17 +42,32 @@ function LogsController(model) {
   }
   model.on('facets:changed', facetsChangeHandler.bind(this));
   
+  // This is where the actual events to change sate start
+  // Queries to the store are received by the controller which
+  // updates the model which triggers events. The controller
+  // listens for those and updates the UI, which may trigger
+  // other events.
   function queryChangeHandler(query) {
-    this.store.query(this.model.query /* TODO: Facets */);
-    this.store.facets(this.model.query);
+    this.store.query(this.model.query, this.model.constraints);
+    this.store.facets(this.model.query, this.model.constraints);
 
-    // TODO: Use URI utility
+    // TODO:  Use URI utility
     // FIXME: This mixes concerns, doesn't it?
     // FIXME: This is really ugly checking differences.
     if(!this.model.equals(history.state)) {
-      history.pushState(this.model.getState(), 
+      var state = this.model.getState();
+      
+      // FIXME: Ugly
+      var cs = [];
+      for(c in state.constraints) {
+        state.constraints[c].forEach(function(cv) { 
+          cs.push(c + '=' + cv);
+        });
+      }
+      
+      history.pushState(state, 
         document.title + ': ' + query, 
-        '/sse.html?q=' + encodeURIComponent(query)
+        '/sse.html?' + ['q=' + encodeURIComponent(query)].concat(cs).join('&')
       );
     }
   }
