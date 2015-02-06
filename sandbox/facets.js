@@ -21,20 +21,28 @@ var where = [
   qb.collection('logs')
 ];
 
-for(var c in constraints) {
-  where.push(
-    qb.or(
-      constraints[c].map(function(val) {
-        return qb.value(c, val);
-      })
-    )
-  );
+function queryFromConstraints(constraints) {
+  var where = [];
+  if('undefined' === typeof constraints || null === constraints) { return where; }
+  for(var c in constraints) {
+    where.push(
+      qb.or(
+        constraints[c].map(function(val) {
+          return qb.value(c, val);
+        })
+      )
+    );
+  }
+  return where;
 }
 
-//console.log('%j', where);
+//console.log('%j', where.concat(queryFromConstraints(constraints)));
+//process.exit(0);
 
 db.documents.query(
-  qb.where(where)
+  qb.where(
+    where.concat(queryFromConstraints(constraints))
+  )
   .calculate(
     qb.facet('sender'),
     qb.facet('host'),
@@ -42,83 +50,60 @@ db.documents.query(
   )
   .slice(0)
 )
-.result(function(response) {
-  console.log(JSON.stringify(response, null, 2));
-});
+.result(
+  function(response) {
+    console.log(JSON.stringify(response, null, 2));
+  },
+  function(error) {
+    console.error(error);
+  }
+);
 
 /*
-{
-  "sender": {
-    "type": "xs:string",
-    "facetValues": [
-      {
-        "name": "MarkLogic",
-        "count": 452,
-        "value": "MarkLogic"
+[
+  {
+    "snippet-format": "empty-snippet",
+    "total": 598,
+    "start": 1,
+    "page-length": 0,
+    "results": [],
+    "facets": {
+      "sender": {
+        "type": "xs:string",
+        "facetValues": [
+          {
+            "name": "MarkLogic",
+            "count": 598,
+            "value": "MarkLogic"
+          }
+        ]
       },
-      {
-        "name": "node",
-        "count": 254,
-        "value": "node"
+      "host": {
+        "type": "xs:string",
+        "facetValues": [
+          {
+            "name": "MacPro-2600",
+            "count": 598,
+            "value": "MacPro-2600"
+          }
+        ]
+      },
+      "severity": {
+        "type": "xs:string",
+        "facetValues": [
+          {
+            "name": "error",
+            "count": 27,
+            "value": "error"
+          },
+          {
+            "name": "warning",
+            "count": 571,
+            "value": "warning"
+          }
+        ]
       }
-    ]
-  },
-  "host": {
-    "type": "xs:string",
-    "facetValues": [
-      {
-        "name": "MacPro-2600",
-        "count": 706,
-        "value": "MacPro-2600"
-      }
-    ]
-  },
-  "severity": {
-    "type": "xs:string",
-    "facetValues": [
-      {
-        "name": "alert",
-        "count": 24,
-        "value": "alert"
-      },
-      {
-        "name": "critical",
-        "count": 27,
-        "value": "critical"
-      },
-      {
-        "name": "debug",
-        "count": 44,
-        "value": "debug"
-      },
-      {
-        "name": "emergency",
-        "count": 1,
-        "value": "emergency"
-      },
-      {
-        "name": "error",
-        "count": 38,
-        "value": "error"
-      },
-      {
-        "name": "info",
-        "count": 94,
-        "value": "info"
-      },
-      {
-        "name": "notice",
-        "count": 40,
-        "value": "notice"
-      },
-      {
-        "name": "warning",
-        "count": 438,
-        "value": "warning"
-      }
-    ]
+    }
   }
-}
+]
 */
-  
-  
