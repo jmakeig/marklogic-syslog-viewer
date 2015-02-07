@@ -11,7 +11,7 @@ function LogsController(model) {
     // Views are in charge of defering binding to elements
     'facets': new FacetsView('form#Facets'),
     'search': new QueryView('form#Search'),
-    'messages': null, // TODO
+    'messages': new MessagesView('table#Logs > tbody'),
   };
   
   this.views.facets.on('constraints:change', (function(constraints) {
@@ -24,7 +24,7 @@ function LogsController(model) {
   this.views.search.on('query:submit', queryChangeHandler.bind(this));
     
   function messageChangeHandler(/*msgs*/) {
-    renderMessages(this.model.messages);
+    this.views.messages.render(this.model.messages);
     var count = document.querySelector('footer .messages-count');
     //console.log(this.model.messages.length + ' message' + (this.model.messages.length > 1 ? 's' : ''));
     count.textContent = 'Showing ' 
@@ -98,12 +98,23 @@ function LogsController(model) {
 /********** View logic **********/
 // FIXME: Get a real UI framework to do the rendering. This is awful.
 
-// FIXME: Convert this over to the view component architecture below.
-function renderMessages(msgs, locale) {
-  var body = document.querySelector('table#Logs > tbody');
+function MessagesView(selector) {
+  this.element = null;
+  
+  document.addEventListener('DOMContentLoaded', (function(e) {
+    console.debug('tbody');
+    this.element = elementFromSelector(selector, document.createElement('tbody'));
+  }).bind(this), false);
+}
+MessagesView.prototype = new EventEmitter2;
+MessagesView.prototype.render = function(msgs) {
+  console.debug('render messages');
+  //var body = document.querySelector('table#Logs > tbody');
+  var body = this.element;
   var table = body.parentNode;
   table.removeChild(body);
-  body = document.createElement('tbody');
+  this.element = body = document.createElement('tbody');
+  
   for(var i = 0; i < msgs.length; i++) {
     var msg = msgs[i];
     body.appendChild(renderRow(msg, msgs[i + 1]));
