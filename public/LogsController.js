@@ -235,7 +235,7 @@ FacetsView.prototype.render = function(facets, constraints, locale) {
   */
   // console.dir(facets);
   var list, header;
-  Object.getOwnPropertyNames(facets).forEach(function(f) {
+  Object.getOwnPropertyNames(facets).sort(/* TODO: Implement me */).forEach(function(f) {
     list = document.createElement('ol');
     // Custom sort for severity
     if('severity' === f) {
