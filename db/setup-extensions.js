@@ -24,7 +24,7 @@ db.documents.write({
   uri: 'logs-alert-config/action-push-http.xqy',
   content: fs.readFileSync(__dirname + '/modules/actions/logs-push-http.xqy', {encoding: 'utf8'}),
   permissions: [
-    { 'role-name': 'logs-reader', capabilities : ['read'] },
+    { 'role-name': 'logs-reader', capabilities : ['read', 'execute'] },
     { 'role-name': 'logs-writer', capabilities : ['insert', 'update'] }
   ]
 })

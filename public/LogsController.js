@@ -83,8 +83,9 @@ function LogsController(model) {
   model.on('constraints:changed', constraintsChangeHandler.bind(this));
   
   // Store  
-  this.store.on('trickle', function(msg) {
-    model.messages.unshift(msg);
+  this.store.on('trickle', function(payload) {
+    model.messages.unshift(payload.message);
+    model.facets = payload.facets;
   });
   
   this.store.on('batch', function(msgs, facets, total) {
@@ -102,14 +103,11 @@ function MessagesView(selector) {
   this.element = null;
   
   document.addEventListener('DOMContentLoaded', (function(e) {
-    console.debug('tbody');
     this.element = elementFromSelector(selector, document.createElement('tbody'));
   }).bind(this), false);
 }
 MessagesView.prototype = new EventEmitter2;
 MessagesView.prototype.render = function(msgs) {
-  console.debug('render messages');
-  //var body = document.querySelector('table#Logs > tbody');
   var body = this.element;
   var table = body.parentNode;
   table.removeChild(body);
