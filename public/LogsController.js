@@ -23,15 +23,16 @@ function LogsController(model) {
   }).bind(this));
   this.views.search.on('query:submit', queryChangeHandler.bind(this));
     
+  // FIXME: This needs to be extracted to a proper View
   function messageChangeHandler(/*msgs*/) {
     this.views.messages.render(this.model.messages);
     var count = document.querySelector('footer .messages-count');
     //console.log(this.model.messages.length + ' message' + (this.model.messages.length > 1 ? 's' : ''));
     count.textContent = 'Showing ' 
-      + this.model.messages.length 
+      + this.model.messages.length.toLocaleString(this.model.locale)
       + ' message' 
       + (this.model.messages.length > 1 ? 's' : '')
-      + ' of ' + this.model.total;
+      + ' of ' + this.model.total.toLocaleString(this.model.locale);
   };
   model.on('messages:changed', messageChangeHandler.bind(this));
   
@@ -263,7 +264,7 @@ FacetsView.prototype.render = function(facets, constraints, locale) {
           checkbox.setAttribute('checked', 'checked');
         }
       item.appendChild(checkbox);
-      item.appendChild(document.createTextNode(' ' + fv.name + ' (' + fv.count + ')'));
+      item.appendChild(document.createTextNode(' ' + fv.name + ' (' + fv.count.toLocaleString(locale) + ')'));
       list.appendChild(item);
       header = document.createElement('h3');
       header.textContent = f;
