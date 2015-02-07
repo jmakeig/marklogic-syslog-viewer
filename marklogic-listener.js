@@ -80,11 +80,16 @@ app.route('/stream/:appID') // ?q=query+string
     });
     
     //if(!req.get('Last-Event-ID')) {
-      var where = qb.byExample(
-        {
-          message: { $word: query }
-        }   
-      );
+      var where = [
+        qb.parsedFrom(query ,
+          qb.parseBindings( 
+            qb.word('host', qb.bind('h')),
+            qb.value('severity', qb.bind('l')),
+            qb.word('sender', qb.bind('s'))
+          )
+        ),
+        qb.collection('logs')
+      ];
       if(null === query) {
         where = qb.collection('logs'); // Everything
       }
@@ -94,12 +99,24 @@ app.route('/stream/:appID') // ?q=query+string
         .orderBy(
           qb.sort('time', 'descending')
         )
-        .slice(1, 50) // FIXME: Set this from the UI
+        .slice(1, 250) // FIXME: Set this from the UI
+        .calculate(
+          qb.facet('sender'),
+          qb.facet('host'),
+          qb.facet('severity')
+        )
       )
         .result(function(response) {
+          //console.log('%j', response[0]);
           writeEvent({
             event: 'batch',
-            data: JSON.stringify(response.map(function(r) { return r.content; })), // FIXME: Why do I have to JSON.stringify here?
+            data: JSON.stringify(
+              {
+                'messages': response.slice(1).map(function(r) { return r.content; }),
+                'facets': response[0].facets,
+                'total': response[0].total
+              }
+            ),
             id: 'batch'
           }, res);
         });

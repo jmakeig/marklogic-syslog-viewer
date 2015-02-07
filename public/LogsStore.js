@@ -25,7 +25,7 @@ LogsStore.prototype.query = function(query, constraints) {
   this.source.addEventListener('batch', function(e) {
     var batch = JSON.parse(e.data);
     //that.model.messages = batch;
-    that.emit('batch', batch, query, constraints);
+    that.emit('batch',  batch.messages, batch.facets, batch.total);
   });
 
   this.source.addEventListener('open', function(e) {
@@ -47,6 +47,8 @@ LogsStore.prototype.query = function(query, constraints) {
   }
 };
 LogsStore.prototype.facets = function(query, constraints) {
+  console.warn('LogsStore.prototype.facets should be subsumed by LogsStore.prototype.query');
+  return;
   var that = this;
   var xhr = new XMLHttpRequest();
   xhr.onreadystatechange = function() {

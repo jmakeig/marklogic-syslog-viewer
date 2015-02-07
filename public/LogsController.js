@@ -30,7 +30,8 @@ function LogsController(model) {
     count.textContent = 'Showing ' 
       + this.model.messages.length 
       + ' message' 
-      + (this.model.messages.length > 1 ? 's' : '');
+      + (this.model.messages.length > 1 ? 's' : '')
+      + ' of ' + this.model.total;
   };
   model.on('messages:changed', messageChangeHandler.bind(this));
   
@@ -49,7 +50,7 @@ function LogsController(model) {
   // other events.
   function queryChangeHandler(query) {
     this.store.query(this.model.query, this.model.constraints);
-    this.store.facets(this.model.query, this.model.constraints);
+    //this.store.facets(this.model.query, this.model.constraints);
 
     // TODO:  Use URI utility
     // FIXME: This mixes concerns, doesn't it?
@@ -77,7 +78,7 @@ function LogsController(model) {
   
   function constraintsChangeHandler(constraints) {
     this.store.query(this.model.query /* TODO: Facets */);
-    this.store.facets(this.model.query, this.model.constraints);
+    //this.store.facets(this.model.query, this.model.constraints);
   }
   model.on('constraints:changed', constraintsChangeHandler.bind(this));
   
@@ -86,14 +87,11 @@ function LogsController(model) {
     model.messages.unshift(msg);
   });
   
-  this.store.on('batch', function(msgs) {
+  this.store.on('batch', function(msgs, facets, total) {
+    model.total = total; // FIXME: Order matter here unfortunately
     model.messages = msgs;
-  });
-  
-  this.store.on('facets', function(facets, query, constraints) {
     model.facets = facets;
   });
-  
   
 }
 

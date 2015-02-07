@@ -17,6 +17,7 @@ function LogsModel(initialState) {
   // Transient state
   var _messages = null; //ArrayProxy.proxy([], messagesChangeHandler.bind(this));
   var _facets = null;
+  var _total = undefined;
   
   Object.defineProperty(this, 'id', {
     value: _state.id,
@@ -34,12 +35,10 @@ function LogsModel(initialState) {
     enumerable: true
   });
   
-  // TODO: Implement me!
   Object.defineProperty(this, 'constraints', {
     get: function() { return _state['constraints']; },
     set: function(value) {
       if(!Object.equals(_state['constraints'], value)) {
-        //console.debug('changed constraints to ' + JSON.stringify(value));
         _state['constraints'] = value;
         this.emit('constraints:changed', value);
       }
@@ -66,6 +65,17 @@ function LogsModel(initialState) {
       if(!Object.equals(_facets, value)) {
         _facets = value;
         this.emit('facets:changed', _facets);
+      }
+    },
+    enumerable: true
+  });
+  
+  Object.defineProperty(this, 'total', {
+    get: function() { return _total; },
+    set: function(value) {
+      if(value !== _total) {
+        _total = value;
+        this.emit('total:changed', _facets);
       }
     },
     enumerable: true
@@ -186,5 +196,6 @@ LogsModel.prototype.equals = function(model) {
   if(!model) return false;
   return this.id === model.id 
     && this.query === model.query 
+    && Object.equals(this.constraints, model.constraints)
     && this.maxWindowLength === model.maxWindowLength;
 }
