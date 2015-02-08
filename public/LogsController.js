@@ -153,7 +153,7 @@ MessagesView.prototype.render = function(msgs) {
     sender.classList.add('sender');
     host.appendChild(document.createTextNode(msg.host));
     host.classList.add('host');
-    message.appendChild(document.createTextNode(msg.message));
+    message.innerHTML = msg.highlight || msg.message;
     message.classList.add('message');
     row.appendChild(severity);
     row.appendChild(time);

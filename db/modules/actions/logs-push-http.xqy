@@ -33,7 +33,10 @@ declare function log:facets($query as cts:query) as json:object {
   return xdmp:to-json($out)
 };
 
-
+declare function log:highlight-string($txt, $q as cts:query) {
+  let $msg as element() := <msg>{string($txt)}</msg>
+  return string-join(cts:highlight($msg, $q, <em>{$cts:text}</em>)/node()/xdmp:quote(.), ' ')
+};
 
 (: Yikes! This will cause an infinite loop of logs for log levels. :)
 (: Make sure the minimum syslog threshold is above debug, e.g. config. :)
@@ -49,7 +52,8 @@ let $out as map:map := map:map()
 let $_ := (
   map:put($out, "facets", log:facets($q)),
   map:put($out, "message", $alert:doc),
-  map:put($out, "total", xdmp:estimate(cts:search(collection(), $q)))
+  map:put($out, "total", xdmp:estimate(cts:search(collection(), $q))),
+  map:put($out, "highlight", log:highlight-string($alert:doc/message, $q))
 )
 
 (: FIXME: If the response is 404 remove the alert rule. Ba-zing! :)

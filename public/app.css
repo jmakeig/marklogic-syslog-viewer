@@ -195,6 +195,12 @@ td.message {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.message em {
+  background-color: rgba(250, 250, 55, 0.5);
+  padding: 0.25em;
+  border-radius: 0.15em;
+  font-style: normal;
+}
 /*
 @-webkit-keyframes flash {
   0% {

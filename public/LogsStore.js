@@ -18,7 +18,13 @@ LogsStore.prototype.query = function(query, constraints) {
 
   this.source.addEventListener('log', function(e) {
     var msg = JSON.parse(e.data);
-    //that.model.messages.unshift(msg);
+    
+    // FIXME: This is a total hack because I can't figure out how to do this on the server
+    if('undefined' !== typeof msg.highlight) {
+      msg.message.highlight = msg.highlight;
+      delete msg.highlight;
+    }
+    
     that.emit('trickle', msg, query, constraints);
   });
 
