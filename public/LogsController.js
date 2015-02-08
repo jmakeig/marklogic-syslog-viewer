@@ -87,6 +87,7 @@ function LogsController(model) {
   this.store.on('trickle', function(payload) {
     model.messages.unshift(payload.message);
     model.facets = payload.facets;
+    model.total = payload.total;
   });
   
   this.store.on('batch', function(msgs, facets, total) {

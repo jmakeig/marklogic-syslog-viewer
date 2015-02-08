@@ -12,20 +12,20 @@ declare variable $host as xs:string := "http://localhost:3000";
 (: Assembles a JSON payload with a message and updated facets :)
 
 declare function log:facets($query as cts:query) as json:object {
-  let $facets as xs:string* := ('sender', 'host', 'severity')
+  let $facets as xs:string* := ("sender", "host", "severity")
   let $out as map:map := map:map()
   let $_ :=
     for $facet in $facets
     return
       map:put($out, $facet, 
-        object-node { 'facetValues': 
+        object-node { "facetValues": 
           json:to-array(
             for $f in cts:values(cts:json-property-reference($facet), (), (), $query)
             return
               object-node {
-                'name': $f,
-                'value': $f,
-                'count': cts:frequency($f)
+                "name": $f,
+                "value": $f,
+                "count": cts:frequency($f)
               }
           )
         }
@@ -40,14 +40,16 @@ declare function log:facets($query as cts:query) as json:object {
 (: 
   xdmp:log(
   xdmp:quote($alert:doc),
-  'debug'
+  "debug"
   ),
 :)
 
+let $q as cts:query := cts:query($alert:rule/alert:query/cts:*)
 let $out as map:map := map:map()
 let $_ := (
-  map:put($out, "facets", log:facets(cts:query($alert:rule/alert:query/cts:*))),
-  map:put($out, "message", $alert:doc)
+  map:put($out, "facets", log:facets($q)),
+  map:put($out, "message", $alert:doc),
+  map:put($out, "total", xdmp:estimate(cts:search(collection(), $q)))
 )
 
 (: FIXME: If the response is 404 remove the alert rule. Ba-zing! :)
