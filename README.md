@@ -1,5 +1,7 @@
 A bare-bones, real-time view of MarkLogic logs.
 
+![syslog](https://cloud.githubusercontent.com/assets/176233/6114053/88432014-b069-11e4-91fe-ae0d8a210ef8.png)
+
 # Set-up
 ## Database
 1. [Import](http://docs.marklogic.com/guide/admin/config_manager#id_38038) the [Configuration Manager](http://localhost:8002/nav/?type=databases) package, [`db/Logs-config.zip`](db/Logs-config.zip). This will create or update `Logs` and `Logs-Triggers` databases and a `Logs` app server, including the trigger definition and trigger script. These are documented in [`db/create-trigger.xqy`](db/create-trigger.xqy) and [`db/trigger.xqy`](db/trigger.xqy), respectively.
