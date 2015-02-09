@@ -91,7 +91,7 @@ function LogsController(model) {
   });
   
   this.store.on('batch', function(msgs, facets, total) {
-    model.total = total; // FIXME: Order matter here unfortunately
+    model.total = total; // FIXME: Order matters here unfortunately
     model.messages = msgs;
     model.facets = facets;
   });

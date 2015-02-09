@@ -4,7 +4,7 @@ var path = require('path');
 var express = require('express')
 var app = express()
 
-var bodyParser = require('body-parser')
+var bodyParser = require('body-parser');
 
 var cookieParser = require('cookie-parser');
 app.use(cookieParser());
