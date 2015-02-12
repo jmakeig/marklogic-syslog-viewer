@@ -148,6 +148,16 @@ function LogsModel(initialState) {
     },
     enumerable: true
   });
+  
+  Object.defineProperty(this, 'locale', {
+    get: function() { return _state.locale; },
+    set: function(value) {
+      if(value !== this.locale) {
+        this.emit('locale:changed', _state.locale = value);
+      }
+    },
+    enumerable: true
+  });
 
   
   // Protected methods
