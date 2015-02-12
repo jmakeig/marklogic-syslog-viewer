@@ -236,9 +236,8 @@ FacetsView.prototype.render = function(facets, constraints, locale) {
     </div>  
   */
   // console.dir(facets);
-  var list, header;
   Object.getOwnPropertyNames(facets).sort(/* TODO: Implement me */).forEach(function(f) {
-    list = document.createElement('ol');
+    var table = document.createElement('table');
     // Custom sort for severity
     if('severity' === f) {
       facets[f].facetValues.sort(function(a, b) {
@@ -255,8 +254,35 @@ FacetsView.prototype.render = function(facets, constraints, locale) {
         return levels[b.value] - levels[a.value];
       });
     }
+    
+    var colgroup = document.createElement('colgroup');
+      var checkboxCol = document.createElement('col');
+        checkboxCol.classList.add('facet-enabled');
+        colgroup.appendChild(checkboxCol);
+      var labelCol = document.createElement('col');
+        labelCol.classList.add('facet-label');
+        colgroup.appendChild(labelCol);
+      var frequencyCol = document.createElement('col');
+        frequencyCol.classList.add('facet-frequency');
+        colgroup.appendChild(frequencyCol);
+    table.appendChild(colgroup);
+    
+    
+    var thead = document.createElement('thead');
+      table.appendChild(thead);
+    
+    var headerRow = document.createElement('tr');
+      var header = document.createElement('th');
+        header.setAttribute('colspan', 3);
+        header.textContent = f;
+        headerRow.appendChild(header);
+    thead.appendChild(headerRow);
+        
+    var tbody = document.createElement('tbody');
+    
     facets[f].facetValues.forEach(function(fv) {
-      var item = document.createElement('li');
+      var item = document.createElement('tr');
+      
       var checkbox = document.createElement('input');
         checkbox.setAttribute('type', 'checkbox');
         checkbox.setAttribute('name', f);
@@ -264,20 +290,40 @@ FacetsView.prototype.render = function(facets, constraints, locale) {
         if(constraints[f] && constraints[f].indexOf(fv.name) >= 0) {
           checkbox.setAttribute('checked', 'checked');
         }
-      item.appendChild(checkbox);
-      item.appendChild(document.createTextNode(' ' + fv.name + ' (' + fv.count.toLocaleString(locale) + ')'));
-      list.appendChild(item);
-      header = document.createElement('h3');
-      header.textContent = f;
+      var checkboxCell = document.createElement('td');
+        if('severity' === f) {
+          checkboxCell.classList.add('severity');
+          checkboxCell.classList.add(fv.value);
+        }
+        checkboxCell.classList.add('facet-enabled');
+        checkboxCell.appendChild(checkbox);
+        item.appendChild(checkboxCell);
+      var labelCell = document.createElement('td');
+        labelCell.classList.add('facet-label');
+        labelCell.appendChild(document.createTextNode(fv.name));
+        item.appendChild(labelCell);
+        
+      var frequencyCell = document.createElement('td');
+        frequencyCell.classList.add('facet-frequency');
+        var frequencySpan = document.createElement('span');
+          frequencySpan.setAttribute('data-frequency', fv.count);
+          frequencySpan.classList.add('frequency');
+          frequencySpan.textContent = fv.count.toLocaleString(locale);
+          frequencyCell.appendChild(frequencySpan);
+        item.appendChild(frequencyCell);
+        
+      tbody.appendChild(item);
     });
+    
+    table.appendChild(tbody);
     
     var container = document.createElement('div');  
       container.classList.add('facet', f);
-    container.appendChild(header);
-    container.appendChild(list);
+    container.appendChild(table);
     form.appendChild(container);
   });
 }
+
 Object.defineProperty(FacetsView.prototype, 'constraints', {
   get: function() { 
     var boxes = Array.prototype.slice.call(this.element.querySelectorAll('input[type=checkbox]'));

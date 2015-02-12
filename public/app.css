@@ -142,6 +142,7 @@ form#Facets ol li {
   margin-bottom: 0.25em;
 }
 table {
+  table-layout: fixed;
   width: 100%;
   border-collapse: collapse;
 }
@@ -175,10 +176,10 @@ td, th {
 th, td {
   vertical-align: top;
 }
-td {
+#Logs td {
   font-family: Inconsolata, Consolas, mono-space;
 }
-td.severity, th.severity {
+#Logs td.severity, #Logs th.severity {
   padding: 0;
   text-indent: -1000em;
 }
@@ -201,35 +202,22 @@ td.message {
   border-radius: 0.15em;
   font-style: normal;
 }
-/*
-@-webkit-keyframes flash {
-  0% {
-    background-color: yellow;
-    opacity: 1;
-  }
-  22% {
-    background-color: yellow;
-    opacity: 0.6;
-  }
-  77% {
-    background-color: yellow;
-    opacity: 0.3;
-  }
-  100% {
-    background-color: inherit;
-  }
+
+.facet table {
+  border: solid 1px #ccc;
 }
-tr.flash td {
-  -webkit-animation-name: flash;
-    -webkit-animation-duration: 500ms;
-    -webkit-animation-iteration-count: 1;
-    -webkit-animation-timing-function: ease-out;
-  -moz-animation-name: flash;
-    -moz-animation-duration: 500ms;
-    -moz-animation-iteration-count: 1;
-    -moz-animation-timing-function: ease-out;
+.facet table td, .facet table td {
+  border-width: 1px 0;
 }
-*/
+.facet .facet-enabled {
+  width: 2em;
+}
+.facet .facet-label {
+}
+.facet .facet-frequency {
+  width: 6em;
+  text-align: right;
+}
 
 .severity.emergency {
   background-color: #43000C;
