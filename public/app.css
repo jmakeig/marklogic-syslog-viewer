@@ -218,7 +218,13 @@ td.message {
   width: 6em;
   text-align: right;
 }
-
+.facet .frequency {
+  background: #333;
+  color: #fff;
+  border-radius: 1em;
+  padding: 0.25em 0.75em;
+  font-size: 0.8em;
+}
 .severity.emergency {
   background-color: #43000C;
 }
