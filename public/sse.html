@@ -44,7 +44,7 @@
 })();
   </script>
   <script type="application/javascript">
-    /* FIXME: Put this into a view */
+    /* FIXME: Yuck! Put this into a view. */
     document.addEventListener('DOMContentLoaded', function(e) {
       var body = document.querySelector('#Body');
       var facets = document.querySelector('#FacetsContainer');
@@ -54,8 +54,7 @@
         //console.debug(el.id);
         //console.debug(el.classList);
         //console.log(e.srcElement.type);
-        if(el === facets && el !== e.srcElement) {
-          console.debug('is facets');
+        if('click' === e.type && el === facets && el !== e.srcElement) {
           return;
         }
         
@@ -75,11 +74,11 @@
           }
         }
       }
-      body.addEventListener('click', handleFacetsNav, false);
+      //body.addEventListener('click', handleFacetsNav, false);
       facets.addEventListener('click', handleFacetsNav, false);
       // TODO: Unlike click events, mouse events need to happen on children too
-      facets.addEventListener('mouseover', handleFacetsNav, false);
-      facets.addEventListener('mouseout', handleFacetsNav, false);
+      //facets.addEventListener('mouseover', handleFacetsNav, false);
+      //facets.addEventListener('mouseout', handleFacetsNav, false);
     }, false);
   </script>
   <link type="text/css" rel="stylesheet" href="app.css"></link>
