@@ -7,14 +7,36 @@
 html, body {
   margin:0;
   padding: 0;
-  height: 100vh;
 }
-body {
+
+#Body {
   display: flex;
   display: -webkit-flex;
   flex-direction: column;
   -webkit-flex-direction: column;
+  
+  position: absolute;
+  right: 0;
+  transition: margin-left 0.5s ease;
+  margin-left: 2em;
+  height: 100vh;
+  
+  z-index: 100;
 }
+#Body.collapsed {
+  transition: margin-left 0.5s ease;
+  margin-left: 20em;
+}
+
+#FacetsContainer {
+  z-index: 1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20em;
+  height: 100vh;
+}
+
 header, nav, article {
   width: 100%;
 }
@@ -62,21 +84,20 @@ form#Search {
 
 /* Facets */
 form#Facets {
-
-  width: 100%;
   display: flex;
   display: -webkit-flex;
-  flex-direction: row;
-  -webkit-flex-direction: row;
-  
+  flex-direction: column;
+  -webkit-flex-direction: column;
 }
-
 .facet {
-  padding: 0.25em;
-  margin-right: 4em;
+  /*outline: solid 1px red;*/
+  padding: 0;
+  margin-right: 2em;
   /* outline: solid 1px red; */
 }
-
+.facet:last-child {
+  margin-right: 0;
+}
 header, nav, article, footer {  
   padding: 0.5em 1em;
 }
@@ -100,6 +121,29 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.1;
   margin: 0;
 }
+table {
+  table-layout: fixed;
+  width: 100%;
+  border-collapse: collapse;
+}
+table caption {
+  display: none;
+}
+
+#Body {
+  background: white;
+  border-left: solid 1px #ccc;
+}
+#Body.collapsed {
+  box-shadow: -8px 0px 8px 0px rgba(0, 0, 0, 0.55);
+}
+#FacetsContainer {
+  background: #333;
+  color: #ccc;
+}
+#FacetsContainer.collapsed {
+}
+
 header h1 {
   font-size: 1.25em;
 }
@@ -110,7 +154,7 @@ footer {
   border-top: solid 1px #ccc;
 }
 form#Search {
-
+  margin-bottom: 0.5em;
 }
 form#Search input {
   font-size: 1.55em;
@@ -130,25 +174,9 @@ form#Search button {
   background: #ddd;
   color: #444;
 }
-form#Facets {
-  margin-top: 0.5em;
-}
-form#Facets ol {
-  list-style-type: none;
-  padding: 0;
-  margin-top: 0.5em 0;
-}
-form#Facets ol li {
-  margin-bottom: 0.25em;
-}
-table {
-  table-layout: fixed;
-  width: 100%;
-  border-collapse: collapse;
-}
-caption {
-  display: none;
-}
+form#Facets {}
+
+
 col.severity {
   width: 0.65em;
 }
@@ -170,11 +198,12 @@ col.message {
 td, th {
   text-align: left;
   padding: 0.25rem 0.5rem;
-  border: solid 1px #ccc;
-  vertical-align: bottom;
+  border-style: solid;
+  border-width: 1px;
 }
-th, td {
+#Logs th, #Logs td {
   vertical-align: top;
+  border-color: #ccc;
 }
 #Logs td {
   font-family: Inconsolata, Consolas, mono-space;
@@ -202,25 +231,27 @@ td.message {
   border-radius: 0.15em;
   font-style: normal;
 }
-
-.facet table {
-  border: solid 1px #ccc;
+.facet {
+  margin: 1rem 0;
 }
-.facet table td, .facet table td {
-  border-width: 1px 0;
+.facet table {}
+.facet th {}
+.facet table th, .facet table td {
+  border-color: #555;
+  border-style: none none solid none;
 }
 .facet .facet-enabled {
   width: 2em;
 }
-.facet .facet-label {
-}
+.facet .facet-label {}
 .facet .facet-frequency {
   width: 6em;
   text-align: right;
+  padding-right: 1em;
 }
 .facet .frequency {
-  background: #333;
-  color: #fff;
+  background: #999;
+  color: #333;
   border-radius: 1em;
   padding: 0.25em 0.75em;
   font-size: 0.8em;

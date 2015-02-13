@@ -24,27 +24,19 @@ html, body {
   height: 100vh;
   
   z-index: 100;
-  
-  background: white;
 }
 #Body.collapsed {
   transition: margin-left 0.5s ease;
-  margin-left: 20em;
+  margin-left: 30em;
 }
-
 
 #FacetsContainer {
   z-index: 1;
   position: absolute;
   top: 0;
   left: 0;
-  width: 20em;
+  width: 30em;
   height: 100vh;
-  
-  background: green;
-}
-#FacetsContainer.collapsed {
-  background: yellow;
 }
 header, nav, article {
   width: 100%;
@@ -113,6 +105,17 @@ form#Facets {
   </style>
 
   <style type="text/css">
+#Body {
+  background: white;
+  box-shadow: -8px 0px 8px 0px rgba(0, 0, 0, 0.33);
+}
+#FacetsContainer {
+  background: #ccc;
+  color: #333;
+}
+#FacetsContainer.collapsed {
+}
+  
 header, footer, nav {
   padding: 0.5em 1em;
 }
@@ -311,32 +314,13 @@ col.message {
   <section id="FacetsContainer" class="collapsed">
     <form id="Facets">
       <div class="facet hosts">
-        <h3>Hosts</h3>
-        <ol>
-          <li><input type="checkbox"/> ex1.example.com (15,839)</li>
-          <li><input type="checkbox"/> qa.some-other.com (4,402)</li>
-          <li><input type="checkbox"/> ex2.example.com (189)</li>
-          <li><input type="checkbox"/> ex3.example.com (5)</li>
-          <li><input type="checkbox"/> ex4.example.com (0)</li>
-        </ol>
+        <table><colgroup><col class="facet-enabled"><col class="facet-label"><col class="facet-frequency"></colgroup><thead><tr><th colspan="3">host</th></tr></thead><tbody><tr><td class="facet-enabled"><input type="checkbox" name="host" value="MacPro-2600"></td><td class="facet-label">MacPro-2600</td><td class="facet-frequency"><span data-frequency="32541" class="frequency">32,541</span></td></tr></tbody></table>
       </div>
       <div class="facet senders">
-        <h3>Sender</h3>
-        <ol>
-          <li><input type="checkbox"/> MarkLogic</li>
-          <li><input type="checkbox"/> Node.js</li>
-        </ol>
+        <table><colgroup><col class="facet-enabled"><col class="facet-label"><col class="facet-frequency"></colgroup><thead><tr><th colspan="3">sender</th></tr></thead><tbody><tr><td class="facet-enabled"><input type="checkbox" name="sender" value="MarkLogic"></td><td class="facet-label">MarkLogic</td><td class="facet-frequency"><span data-frequency="32252" class="frequency">32,252</span></td></tr><tr><td class="facet-enabled"><input type="checkbox" name="sender" value="node"></td><td class="facet-label">node</td><td class="facet-frequency"><span data-frequency="259" class="frequency">259</span></td></tr><tr><td class="facet-enabled"><input type="checkbox" name="sender" value="Other"></td><td class="facet-label">Other</td><td class="facet-frequency"><span data-frequency="26" class="frequency">26</span></td></tr><tr><td class="facet-enabled"><input type="checkbox" name="sender" value="taskgated"></td><td class="facet-label">taskgated</td><td class="facet-frequency"><span data-frequency="4" class="frequency">4</span></td></tr></tbody></table>
       </div>
-      <div class="facet severities">
-        <h3>Severity</h3>
-        <ol>
-          <li><input type="checkbox"/> Critical</li>
-          <li><input type="checkbox"/> Alert</li>
-          <li><input type="checkbox"/> Error</li>
-          <li><input type="checkbox"/> Notice</li>
-          <li><input type="checkbox"/> Info</li>
-          <li><input type="checkbox"/> Debug</li>
-        </ol>
+      <div class="facet severity">
+        <table><colgroup><col class="facet-enabled"><col class="facet-label"><col class="facet-frequency"></colgroup><thead><tr><th colspan="3">severity</th></tr></thead><tbody><tr><td class="severity emergency facet-enabled"><input type="checkbox" name="severity" value="emergency"></td><td class="facet-label">emergency</td><td class="facet-frequency"><span data-frequency="2" class="frequency">2</span></td></tr><tr><td class="severity alert facet-enabled"><input type="checkbox" name="severity" value="alert"></td><td class="facet-label">alert</td><td class="facet-frequency"><span data-frequency="24" class="frequency">24</span></td></tr><tr><td class="severity critical facet-enabled"><input type="checkbox" name="severity" value="critical"></td><td class="facet-label">critical</td><td class="facet-frequency"><span data-frequency="48" class="frequency">48</span></td></tr><tr><td class="severity error facet-enabled"><input type="checkbox" name="severity" value="error"></td><td class="facet-label">error</td><td class="facet-frequency"><span data-frequency="218" class="frequency">218</span></td></tr><tr><td class="severity warning facet-enabled"><input type="checkbox" name="severity" value="warning"></td><td class="facet-label">warning</td><td class="facet-frequency"><span data-frequency="1066" class="frequency">1,066</span></td></tr><tr><td class="severity notice facet-enabled"><input type="checkbox" name="severity" value="notice"></td><td class="facet-label">notice</td><td class="facet-frequency"><span data-frequency="31029" class="frequency">31,029</span></td></tr><tr><td class="severity info facet-enabled"><input type="checkbox" name="severity" value="info"></td><td class="facet-label">info</td><td class="facet-frequency"><span data-frequency="104" class="frequency">104</span></td></tr><tr><td class="severity debug facet-enabled"><input type="checkbox" name="severity" value="debug"></td><td class="facet-label">debug</td><td class="facet-frequency"><span data-frequency="50" class="frequency">50</span></td></tr></tbody></table>
       </div>
       <!--<div class="facet date-range">
     
