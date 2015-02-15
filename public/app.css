@@ -141,13 +141,14 @@ table caption {
 #Body {
   background: white;
   border-left: solid 1px #ccc;
+  box-shadow: -8px 0px 8px 0px rgba(0, 0, 0, 0.33);
 }
 #Body.collapsed {
-  /*box-shadow: -8px 0px 12px 0px rgba(0, 0, 0, 0.55);*/
+  
 }
 #FacetsContainer {
-  background: #333;
-  color: #ccc;
+  background: #eee;
+  color: #666;
 }
 #FacetsContainer.collapsed {
 
@@ -246,9 +247,11 @@ td.message {
   margin: 1rem 0;
 }
 .facet table {}
-.facet th {}
+.facet th {
+  font-weight: normal;
+}
 .facet table th, .facet table td {
-  border-color: #555;
+  border-color: #ccc;
   border-style: none none solid none;
 }
 .facet .facet-enabled {
@@ -261,8 +264,7 @@ td.message {
   padding-right: 1em;
 }
 .facet .frequency {
-  background: #999;
-  color: #333;
+  background: #ccc;
   border-radius: 1em;
   padding: 0.25em 0.75em;
   font-size: 0.8em;
