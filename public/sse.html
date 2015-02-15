@@ -48,7 +48,7 @@
     document.addEventListener('DOMContentLoaded', function(e) {
       var body = document.querySelector('#Body');
       var facets = document.querySelector('#FacetsContainer');
-      var handle = document.querySelector('form#Search .control.facet-handle');
+      var handle = document.querySelector('form#Search .control.facets-handle');
       
       body.addEventListener('webkitTransitionEnd', 
         function(e) { 
@@ -77,7 +77,7 @@
     </header>
     <nav>
       <form id="Search">
-        <div class="control facet-handle"><button>F</button></div>
+        <div class="control facets-handle"><button title="Toggle facets">&#xe800;</button></div>
         <div class="control search"><input type="text" name="q" /></div>
         <div class="control submit"><button>Search</button></div>
       </form>
