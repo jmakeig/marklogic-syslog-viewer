@@ -61,25 +61,28 @@ footer {
 
 /* Search */
 form#Search {
-  width: 100%;
+  /*width: 100%;*/
   display: flex;
   display: -webkit-flex;
   flex-direction: row;
   -webkit-flex-direction: row;
 }
-.control {}
-.search {
-  flex: 80%;
-  -webkit-flex: 80%;
-  margin-right: 1em;
+#Search .search {
+          flex: 1 1 0;
+  -webkit-flex: 1 1 0;
   /* -webkit-align-self: stretch; */
 }
+#Search .facet-handle {}
+#Search .submit {
+  margin-left: 1em;
+}
+/*.control { outline: solid 1px orange; }*/
+
 .control.search input {
   width: 100%;
 }
-.control.submit {
-  flex: 1 3em 3em;
-  -webkit-flex: 1 3em 3em; /* grow shrink basis*/
+#Search .facet-handle button {
+
 }
 
 /* Facets */
@@ -135,13 +138,14 @@ table caption {
   border-left: solid 1px #ccc;
 }
 #Body.collapsed {
-  box-shadow: -8px 0px 8px 0px rgba(0, 0, 0, 0.55);
+  /*box-shadow: -8px 0px 12px 0px rgba(0, 0, 0, 0.55);*/
 }
 #FacetsContainer {
   background: #333;
   color: #ccc;
 }
 #FacetsContainer.collapsed {
+
 }
 
 header h1 {
@@ -174,8 +178,11 @@ form#Search button {
   background: #ddd;
   color: #444;
 }
+form#Search .control.facet-handle button {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
 form#Facets {}
-
 
 col.severity {
   width: 0.65em;

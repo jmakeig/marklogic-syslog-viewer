@@ -48,37 +48,24 @@
     document.addEventListener('DOMContentLoaded', function(e) {
       var body = document.querySelector('#Body');
       var facets = document.querySelector('#FacetsContainer');
+      var handle = document.querySelector('form#Search .control.facet-handle');
       
+      body.addEventListener('webkitTransitionEnd', 
+        function(e) { 
+          console.debug('transition end');
+        }, false );
       function handleFacetsNav(e) {
         var el = e.currentTarget;
-        //console.debug(el.id);
-        //console.debug(el.classList);
-        //console.log(e.srcElement.type);
-        if('click' === e.type && el === facets && el !== e.srcElement) {
-          return;
-        }
-        
-        if(body === el && el.classList.contains('collapsed')) {
-          // expand
+        // Toggle
+        if(body.classList.contains('collapsed')) {
           body.classList.remove('collapsed');
           facets.classList.add('collapsed');
-        }
-        if(facets === el) {
-          // Toggle
-          if(body.classList.contains('collapsed')) {
-            body.classList.remove('collapsed');
-            facets.classList.add('collapsed');
-          } else {
-            body.classList.add('collapsed');
-            facets.classList.remove('collapsed');
-          }
+        } else {
+          body.classList.add('collapsed');
+          facets.classList.remove('collapsed');
         }
       }
-      //body.addEventListener('click', handleFacetsNav, false);
-      facets.addEventListener('click', handleFacetsNav, false);
-      // TODO: Unlike click events, mouse events need to happen on children too
-      //facets.addEventListener('mouseover', handleFacetsNav, false);
-      //facets.addEventListener('mouseout', handleFacetsNav, false);
+      handle.addEventListener('click', handleFacetsNav, false);
     }, false);
   </script>
   <link type="text/css" rel="stylesheet" href="app.css"></link>
@@ -90,6 +77,7 @@
     </header>
     <nav>
       <form id="Search">
+        <div class="control facet-handle"><button>F</button></div>
         <div class="control search"><input type="text" name="q" /></div>
         <div class="control submit"><button>Search</button></div>
       </form>

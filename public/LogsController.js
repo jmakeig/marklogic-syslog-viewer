@@ -218,6 +218,22 @@ function FacetsView(selector) {
 
   
 }
+
+/** http://stackoverflow.com/a/16348977 */
+function stringToColour(str) {
+  var hash = 0;
+  for (var i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  var colour = '#';
+  for (var i = 0; i < 3; i++) {
+    var value = (hash >> (i * 8)) & 0xFF;
+    colour += ('00' + value.toString(16)).substr(-2);
+  }
+  return colour;
+}
+
+
 FacetsView.prototype = new EventEmitter2;
 FacetsView.prototype.render = function(facets, constraints, locale) {
   //var form = document.querySelector('form#Facets');
@@ -287,13 +303,15 @@ FacetsView.prototype.render = function(facets, constraints, locale) {
         checkbox.setAttribute('type', 'checkbox');
         checkbox.setAttribute('name', f);
         checkbox.setAttribute('value', fv.name);
-        if(constraints[f] && constraints[f].indexOf(fv.name) >= 0) {
+        if(!constraints || !constraints[f] || constraints[f].indexOf(fv.name) < 0) {
           checkbox.setAttribute('checked', 'checked');
         }
       var checkboxCell = document.createElement('td');
         if('severity' === f) {
           checkboxCell.classList.add('severity');
           checkboxCell.classList.add(fv.value);
+        } else {
+          checkboxCell.style.backgroundColor = stringToColour(fv.value);
         }
         checkboxCell.classList.add('facet-enabled');
         checkboxCell.appendChild(checkbox);
