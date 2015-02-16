@@ -177,7 +177,22 @@ form#Search button {
   color: #666;
   text-shadow: #efefef 1px 1px;
   border: solid 1px #ccc;
-  background: linear-gradient(to bottom, rgba(246,248,249,1) 0%,rgba(229,235,238,1) 50%,rgba(215,222,227,1) 51%,rgba(245,247,249,1) 100%);
+  background: linear-gradient(
+    to bottom, 
+    rgba(246,248,249,1)   0%,
+    rgba(229,235,238,1)  50%,
+    rgba(215,222,227,1)  51%,
+    rgba(245,247,249,1) 100%
+  );
+}
+form#Search button:active {
+  background: linear-gradient(
+    to bottom, 
+    rgba(229,235,238,1)   0%,
+    rgba(245,247,249,1)  50%,
+    rgba(246,248,249,1)  51%,
+    rgba(215,222,227,1) 100%
+  );
 }
 form#Search .facets-handle button {
   border-top-left-radius: 1em;
