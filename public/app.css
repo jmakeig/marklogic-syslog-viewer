@@ -288,12 +288,13 @@ td.message {
 .pill {
   border-radius: 1em;
   display: inline-block;
-  width: 1em;
-  height: 1em;
+  width: 0.75em;
+  height: 0.75em;
   margin-right: 0.5em;
 }
 .severity .pill {
   text-indent: -100em;
+  margin-right: 0;
 }
 .emergency {
   background-color: #43000C;
