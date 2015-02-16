@@ -130,8 +130,15 @@ MessagesView.prototype.render = function(msgs) {
         host = document.createElement('td'),
         severity = document.createElement('td'),
         message = document.createElement('td');
-    if(msg.severity) { severity.classList.add('severity', msg.severity.toLowerCase()); }
-    severity.appendChild(document.createTextNode(msg.severity));
+    var severityPill = document.createElement('span'),
+        senderPill = document.createElement('span'),
+        hostPill = document.createElement('span');
+    //if(msg.severity) { severity.classList.add('severity', msg.severity.toLowerCase()); }
+    severityPill.classList.add('pill');
+    severityPill.classList.add(msg.severity);
+    severityPill.textContent = msg.severity;
+    severity.classList.add('severity');
+    severity.appendChild(severityPill);
     severity.setAttribute('data-severity', msg.severity);
     severity.setAttribute('title', msg.severity);
     var currentTime = moment(msg.time);
@@ -149,8 +156,16 @@ MessagesView.prototype.render = function(msgs) {
     time.appendChild(document.createTextNode(currentTime.format(TIMESTAMP))); // .SSS for fractional seconds
     time.setAttribute('data-time', currentTime.format());
     time.classList.add('time');
+    senderPill.classList.add('pill');
+    senderPill.style.backgroundColor = stringToColour(msg.sender);
+    //senderPill.textContent = msg.sender;
+    sender.appendChild(senderPill);
     sender.appendChild(document.createTextNode(msg.sender));
     sender.classList.add('sender');
+    hostPill.classList.add('pill');
+    hostPill.style.backgroundColor = stringToColour(msg.host);
+    //hostPill.textContent = msg.host;
+    host.appendChild(hostPill);
     host.appendChild(document.createTextNode(msg.host));
     host.classList.add('host');
     message.innerHTML = msg.highlight || msg.message;

@@ -190,7 +190,7 @@ form#Search .submit button {
 form#Facets {}
 
 col.severity {
-  width: 0.65em;
+  width: 2em;
 }
 col.time {
   width: 11.5em;
@@ -199,10 +199,10 @@ col.diff {
   width: 5em;
 }
 col.sender {
-  width: 7em;
+  width: 10em;
 }
 col.host {
-  width: 10em;
+  width: 12em;
 }
 col.message {
   
@@ -220,12 +220,8 @@ td, th {
 #Logs td {
   font-family: Inconsolata, Consolas, mono-space;
 }
-#Logs td.severity, #Logs th.severity {
-  padding: 0;
-  text-indent: -1000em;
-}
-th.severity {
-  background-color: #dcdcdc;
+th.severity, td.severity {
+  text-align: center;
 }
 th .key {
   font-size: 75%;
@@ -265,46 +261,58 @@ td.message {
 }
 .facet .frequency {
   background: #ccc;
-  border-radius: 1em;
   padding: 0.25em 0.75em;
+  border-radius: 1em;
+}
+.facet .frequency {
   font-size: 0.8em;
 }
-.severity.emergency {
+.pill {
+  border-radius: 1em;
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-right: 0.5em;
+}
+.severity .pill {
+  text-indent: -100em;
+}
+.emergency {
   background-color: #43000C;
 }
 td.time, td.diff {
   text-align: right;
 }
-.severity.alert {
+.alert {
   background-color: #720013;
 }
-.severity.critical {
+.critical {
   background-color: #9B001C;
 }
-.severity.error {
+.error {
   background-color: #CF0638;
 }
-.severity.warning {
+.warning {
   background-color: #FA6632;
 }
-.severity.notice {
+.notice {
   background-color: #0A6789;
 }
-.severity.info {
+.info {
   background-color: #0A6789;
 }
-.severity.config {
+.config {
   background-color: #FECD23;
 }
-.severity.debug {
+.debug {
   background-color: #0A996F;
 }
-.severity.fine {
+.fine {
   background-color: #DEE7E7;
 }
-.severity.finer {
+.finer {
   background-color: #DEE7E7;
 }
-.severity.finest {
+.finest {
   background-color: #DEE7E7;
 }
