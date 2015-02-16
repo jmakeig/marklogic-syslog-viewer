@@ -129,6 +129,9 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.1;
   margin: 0;
 }
+input:focus, textarea:focus {
+  outline: none;
+}
 table {
   table-layout: fixed;
   width: 100%;
