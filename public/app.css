@@ -153,9 +153,7 @@ table caption {
   background: #eee;
   color: #666;
 }
-#FacetsContainer.collapsed {
-
-}
+#FacetsContainer.collapsed {}
 
 header h1 {
   font-size: 1.25em;
