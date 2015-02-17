@@ -229,44 +229,26 @@ function FacetsView(selector) {
   document.addEventListener('DOMContentLoaded', (function(e) {
     this.element = elementFromSelector(selector, document.createElement('form'));
     this.element.addEventListener('change', handleChange.bind(this), false);
-  }).bind(this));
-
-  
+  }).bind(this));  
 }
-
-/** http://stackoverflow.com/a/16348977 */
-function stringToColour(str) {
-  var hash = 0;
-  for (var i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  var colour = '#';
-  for (var i = 0; i < 3; i++) {
-    var value = (hash >> (i * 8)) & 0xFF;
-    colour += ('00' + value.toString(16)).substr(-2);
-  }
-  return colour;
-}
-
 
 FacetsView.prototype = new EventEmitter2;
 FacetsView.prototype.render = function(facets, constraints, locale) {
-  //var form = document.querySelector('form#Facets');
+  var labels = {
+    'severity': 'Severity',
+    'host': 'Host',
+    'sender': 'Sender'
+  };
+  var icons = {
+    'severity': '\ue809',
+    'host': '\ue805',
+    'sender': '\ue807'
+  };
+  
   form = this.element;
+  // FIXME: Is this the most efficient way to clear?
   while(form.lastChild) { form.removeChild(form.lastChild); }
-  /*
-    <div class="facet hosts">
-      <h3>Hosts</h3>
-      <ol>
-        <li><input type="checkbox"/> ex1.example.com (15,839)</li>
-        <li><input type="checkbox"/> qa.some-other.com (4,402)</li>
-        <li><input type="checkbox"/> ex2.example.com (189)</li>
-        <li><input type="checkbox"/> ex3.example.com (5)</li>
-        <li><input type="checkbox"/> ex4.example.com (0)</li>
-      </ol>
-    </div>  
-  */
-  // console.dir(facets);
+  
   Object.getOwnPropertyNames(facets).sort(/* TODO: Implement me */).forEach(function(f) {
     var table = document.createElement('table');
     // Custom sort for severity
@@ -304,8 +286,12 @@ FacetsView.prototype.render = function(facets, constraints, locale) {
     
     var headerRow = document.createElement('tr');
       var header = document.createElement('th');
+      var headerIcon = document.createElement('span');
+        headerIcon.classList.add('icon');
+        headerIcon.textContent= icons[f];
         header.setAttribute('colspan', 3);
-        header.textContent = f;
+        header.appendChild(headerIcon);
+        header.appendChild(document.createTextNode(labels[f]));
         headerRow.appendChild(header);
     thead.appendChild(headerRow);
         
