@@ -56,8 +56,10 @@
           //console.debug('transition end');
         }, false );
       function handleFacetsNav(e) {
+        // Prevent form submission
         e.preventDefault();
         var el = e.currentTarget;
+        
         // Toggle
         if(body.classList.contains('collapsed')) {
           body.classList.remove('collapsed');
@@ -132,7 +134,8 @@
     <footer><span class="messages-count">Showing … messages</span></footer>
   </section>
   <section id="FacetsContainer" class="collapsed">
-    <form id="Facets"></form>
+    <div id="FacetsTools"><span class="icon">&#xe80c;</span>Refresh</div>
+    <form id="Facets"><!-- Filled by FacetsView --></form>
   </section>
 </body>
 </html>

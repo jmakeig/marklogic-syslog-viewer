@@ -106,7 +106,7 @@ form#Facets {
   margin-right: 0;
 }
 header, nav, article, footer {  
-  padding: 0.5em 1em;
+  padding: 0.5rem 1rem;
 }
 nav {
   padding-bottom: 0;
@@ -227,6 +227,7 @@ td, th {
   padding: 0.25rem 0.5rem;
   border-style: solid;
   border-width: 1px;
+  background-clip: padding-box;
 }
 #Logs th, #Logs td {
   vertical-align: top;
@@ -255,6 +256,17 @@ td.message {
   border-radius: 0.15em;
   font-style: normal;
 }
+#FacetsTools {
+  padding: 0.5em;
+  cursor: default;
+  background: #666;
+  color: #eee;
+  
+  /* The spacing here is delicate and based on header/h1 */
+  line-height: 1.375em; /* 1.1 line-height * 1.25 font-size */
+  border-bottom: solid 1px #333;
+  margin-top: -1px;
+}
 .facet {
   margin: 1rem 0;
 }
@@ -270,7 +282,8 @@ th .icon {
   border-color: #ccc;
   border-style: none none solid none;
 }
-.facet th .icon {
+.facet th .icon, 
+#FacetsTools .icon {
   margin-right: 1em;
 }
 .facet .facet-enabled {
@@ -296,8 +309,6 @@ th .icon {
   width: 0.75em;
   height: 0.75em;
   margin-right: 0.5em;
-  
-  font-family: 'fontello';
 }
 .severity .pill {
   text-indent: -100em;
