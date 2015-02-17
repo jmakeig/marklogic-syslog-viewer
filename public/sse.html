@@ -44,6 +44,7 @@
 })();
   </script>
   <script type="application/javascript">
+    console.warn('Facets toggle needs to be moved into a view.');
     /* FIXME: Yuck! Put this into a view. */
     document.addEventListener('DOMContentLoaded', function(e) {
       var body = document.querySelector('#Body');
@@ -52,9 +53,10 @@
       
       body.addEventListener('webkitTransitionEnd', 
         function(e) { 
-          console.debug('transition end');
+          //console.debug('transition end');
         }, false );
       function handleFacetsNav(e) {
+        e.preventDefault();
         var el = e.currentTarget;
         // Toggle
         if(body.classList.contains('collapsed')) {
@@ -94,8 +96,8 @@
         <thead>
           <tr>
             <th class="severity"><span class="icon">&#xe809;</span></th>
-            <th class="time">Time <div class="key">h:m:s, y-m-d</div></th>
-            <th class="diff">Diff  <div class="key">seconds</th>
+            <th class="time"><span class="icon">&#xe80b;</span>Time <div class="key">h:m:s, y-m-d</div></th>
+            <th class="diff"><span class="icon">&#xe802;</span>Diff  <div class="key">seconds</th>
             <th class="sender"><span class="icon">&#xe807;</span>Sender</th>
             <th class="host"><span class="icon">&#xe805;</span>Host</th>
             <th class="message"><span class="icon">&#xe80a;</span>Message</th>

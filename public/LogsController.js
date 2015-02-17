@@ -231,20 +231,18 @@ function FacetsView(selector) {
     this.element.addEventListener('change', handleChange.bind(this), false);
   }).bind(this));  
 }
-
+FacetsView.labels = {
+  'severity': 'Severity',
+  'host':     'Host',
+  'sender':   'Sender'
+};
+FacetsView.icons = {
+    'severity': '\ue809',
+    'host':     '\ue805',
+    'sender':   '\ue807'
+  };
 FacetsView.prototype = new EventEmitter2;
 FacetsView.prototype.render = function(facets, constraints, locale) {
-  var labels = {
-    'severity': 'Severity',
-    'host': 'Host',
-    'sender': 'Sender'
-  };
-  var icons = {
-    'severity': '\ue809',
-    'host': '\ue805',
-    'sender': '\ue807'
-  };
-  
   form = this.element;
   // FIXME: Is this the most efficient way to clear?
   while(form.lastChild) { form.removeChild(form.lastChild); }
@@ -288,10 +286,10 @@ FacetsView.prototype.render = function(facets, constraints, locale) {
       var header = document.createElement('th');
       var headerIcon = document.createElement('span');
         headerIcon.classList.add('icon');
-        headerIcon.textContent= icons[f];
+        headerIcon.textContent= FacetsView.icons[f];
         header.setAttribute('colspan', 3);
         header.appendChild(headerIcon);
-        header.appendChild(document.createTextNode(labels[f]));
+        header.appendChild(document.createTextNode(FacetsView.labels[f]));
         headerRow.appendChild(header);
     thead.appendChild(headerRow);
         
