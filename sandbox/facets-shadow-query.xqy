@@ -1,5 +1,5 @@
 declare namespace local = "local";
-declare function local:facets($facets as map:map, $zero as xs:integer?) as map:map {
+declare function local:facet-frequencies($facets as map:map, $zero as xs:integer?) as map:map {
   let $map as map:map := map:map()
   let $_ := for $k in map:keys($facets)
     return map:put($map, $k, 
@@ -10,8 +10,8 @@ declare function local:facets($facets as map:map, $zero as xs:integer?) as map:m
     )
   return $map
 };
-declare function local:facets($facets as map:map) as map:map {
-  local:facets($facets, ())
+declare function local:facet-frequencies($facets as map:map) as map:map {
+  local:facet-frequencies($facets, ())
 };
 
 (::
@@ -30,8 +30,8 @@ declare function local:shadow-values(
   $quality-weight as xs:double?,
   $forest-ids as xs:unsignedLong*
 ) as map:map {
-  let $all as map:map := local:facets(cts:values($range-indexes, $start, ("map"), $shadow-query), 0)
-  let $some as map:map := local:facets(cts:values($range-indexes, $start, ($options, "map"), $query))
+  let $all as map:map := local:facet-frequencies(cts:values($range-indexes, $start, ("map"), $shadow-query), 0)
+  let $some as map:map := local:facet-frequencies(cts:values($range-indexes, $start, ($options, "map"), $query))
   let $map as map:map := map:new($all)
   let $_ := for $k in map:keys($some) return map:put($map, $k, map:get($some, $k))
   return 
@@ -58,8 +58,17 @@ declare function local:shadow-values(
 };
 
 let $shadow-query as cts:query := cts:collection-query("logs")
-let $query as cts:query := cts:and-query((cts:collection-query("logs"), cts:word-query("taskgated")))
+let $query as cts:query := cts:and-query((cts:collection-query("logs"), cts:word-query("task*")))
 return 
   xdmp:to-json(
     local:shadow-values(cts:json-property-reference("sender"), (), (), $query, $shadow-query)
   )
+  
+(:
+  {
+    "taskgated": 4,
+    "node": 0,
+    "Other": 0,
+    "MarkLogic": 30832
+  }
+:)
