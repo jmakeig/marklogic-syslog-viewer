@@ -2,6 +2,7 @@ var marklogic = require('marklogic');
 var conn = require('../marklogic-config.js').connection;
 var db = marklogic.createDatabaseClient(conn);
 var qb = marklogic.queryBuilder;
+var Promise = require('bluebird');
 
 var queryString = '';
 
@@ -36,9 +37,10 @@ function queryFromConstraints(constraints) {
   return where;
 }
 
-//console.log('%j', where.concat(queryFromConstraints(constraints)));
-//process.exit(0);
+// console.log('%j', where.concat(queryFromConstraints(constraints)));
+// process.exit(0);
 
+/*
 db.documents.query(
   qb.where(
     where.concat(queryFromConstraints(constraints))
@@ -58,6 +60,72 @@ db.documents.query(
     console.error(error);
   }
 );
+*/
+
+function getResults(txid) {
+  return db.documents.query(
+    qb.where(
+      where.concat(queryFromConstraints(constraints))
+    )
+    // .calculate(
+    //   qb.facet('sender'),
+    //   qb.facet('host'),
+    //   qb.facet('severity')
+    // )
+    .slice(5)
+    .withOptions({txid: txid})
+  )
+  .result();
+}
+function getFacet(constraint /* string */, where, txid) {
+  var pruned = Object.create(null);
+  for(var p in constraints) {
+    if(constraint !== p) {
+      pruned[p] = constraints[p];
+    }
+  }
+  //console.log('%j', pruned);  
+  
+  return db.documents.query(
+    qb.where(
+      where.concat(queryFromConstraints(pruned))
+    )
+    .calculate(
+      qb.facet(constraint)
+    )
+    .slice(0)
+    .withOptions({txid: txid})
+  )
+  .result();
+
+}
+
+db.transactions.open().result()
+  .then(function(txn) {
+    return txn.txid;
+  })
+  .then(function(txid) {
+    console.log(txid);
+    Promise.join(
+      getResults(txid),
+      getFacet('sender', where, txid),
+      getFacet('host', where, txid),
+      getFacet('severity', where, txid),
+      function(results, senders, hosts, severities) {
+        //console.log('%j', results);
+        //console.log('%j', senders);
+        //console.log('%j', hosts);
+        console.log('%j', severities);
+      }
+    )
+  })
+//   .then(function(response) {
+//     console.log(JSON.stringify(response, null, 2));
+//   })
+  .finally()
+  .catch(function(error) {
+    console.dir(error);
+  });
 
 /*
 [
