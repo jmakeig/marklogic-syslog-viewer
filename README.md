@@ -1,3 +1,5 @@
+![screenshot](https://cloud.githubusercontent.com/assets/176233/11567984/a910ff2c-999e-11e5-8e5b-d7d63870cd88.png)
+
 A bare-bones, real-time view of MarkLogic logs.
 
 ![syslog](https://cloud.githubusercontent.com/assets/176233/6114053/88432014-b069-11e4-91fe-ae0d8a210ef8.png)
